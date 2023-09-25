@@ -15,3 +15,8 @@ void ATacticalPlayerController::BeginPlay()
 	//Show mouse cursor when game is running
 	bShowMouseCursor = true;
 }
+
+void ATacticalPlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+}
