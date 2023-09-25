@@ -95,7 +95,6 @@ void APlayerPawn::SmoothCameraMovement(float deltaTime)
 	float newYawRotation = _desiredYawRotation * deltaTime;
 	FRotator newRotation = FRotator(GetActorRotation().Pitch, newYawRotation, GetActorRotation().Roll);
 	SetActorRotation(newRotation);
-	GEngine->AddOnScreenDebugMessage(-1, 3, FColor::Red, TEXT("rotating"));
 	_isRotating = false;
 
 }
