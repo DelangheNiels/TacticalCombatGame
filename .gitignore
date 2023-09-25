@@ -49,6 +49,11 @@ SourceArt/**/*.tga
 Binaries/*
 Plugins/*/Binaries/*
 
+#Other Files
+TacticalCombatGame/Binaries/*
+TacticalCombatGame/Intermediate/*
+TacticalCombatGame/Saved/*
+
 # Builds
 Build/*
 
