@@ -86,4 +86,6 @@ private:
 	void SpawnTile(const FVector& tileLocation);
 
 	void TraceCheck(const FVector& position);
+
+	bool HasHitObstacle(const FHitResult& hitResult);
 };

@@ -2,6 +2,7 @@
 
 
 #include "Grid.h"
+#include "GridObstacleVolume.h"
 
 #include "Components/InstancedStaticMeshComponent.h"
 
@@ -119,14 +120,24 @@ void AGrid::TraceCheck(const FVector& position)
 	queryParams.AddIgnoredActor(this);
 	GetWorld()->LineTraceSingleByChannel(hit, traceStart, traceEnd, _traceChannel, queryParams);
 
-	if (!hit.bBlockingHit || !IsValid(hit.GetActor()))
-		return; //if nothing hit, return
+	if (!hit.bBlockingHit || !IsValid(hit.GetActor()) || HasHitObstacle(hit))
+		return; //do not spawn tile when hitting nothing or obstacle
+
 
 	//if hit something, spawn tile at location
 	FVector hitLocation = hit.Location;
 	hitLocation += FVector(0, 0, _tileHeightOffset); //add small offset in height to stop Z-fighting
 	SpawnTile(hitLocation);
 
+}
+
+bool AGrid::HasHitObstacle(const FHitResult& hitResult)
+{
+	AGridObstacleVolume* obstacleVolume = Cast<AGridObstacleVolume>(hitResult.GetActor());
+	if (obstacleVolume)
+		return true;
+
+	return false;
 }
 
 
