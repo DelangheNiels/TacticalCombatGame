@@ -6,27 +6,6 @@
 #include "GameFramework/Actor.h"
 #include "Grid.generated.h"
 
-USTRUCT(BlueprintType)
-struct FGridTileData
-{
-	GENERATED_BODY()
-
-public:
-		UPROPERTY(EditAnywhere)
-			FVector MeshSize;
-		UPROPERTY(EditAnywhere)
-			UStaticMesh* Mesh;
-		UPROPERTY(EditAnywhere)
-			UMaterialInstance* MeshMaterial;
-		UPROPERTY(EditAnywhere)
-			UStaticMesh* FlatMesh;
-		UPROPERTY(EditAnywhere)
-			UMaterialInstance* BorderMaterial;
-		UPROPERTY(EditAnywhere)
-			UMaterialInstance* FillMaterial;
-
-};
-
 UCLASS()
 class TACTICALCOMBATGAME_API AGrid : public AActor
 {
@@ -48,28 +27,17 @@ public:
 
 private:
 
-	UPROPERTY(EditInstanceOnly)
+	UPROPERTY()
 		USceneComponent* _rootComponent;
 
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-		FGridTileData _tileData;
+	UPROPERTY(EditInstanceOnly)
+		class UGridVisualComponent* _gridVisualComp;
 
-	UPROPERTY(EditInstanceOnly, meta = (AllowPrivateAccess = "true"))
-		class UInstancedStaticMeshComponent* _instancedGridMesh;
-
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-		FVector _tileSize;
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 		FVector2D _rowColumnSize;
 
-	UPROPERTY(EditAnywhere)
-		TEnumAsByte<ECollisionChannel> _traceChannel;
-
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-		float _tileHeightOffset = 0.05f;
-
-	UPROPERTY(EditAnywhere)
-		bool _shouldScanEnvironment; //if true, only place grid tiles on ground 
+	UPROPERTY()
+		TArray<class AGridTile*> _gridTiles;
 
 	//Functions
 
@@ -83,9 +51,4 @@ private:
 	//Used to allign grid with template lines
 	FVector SnapVectorToVector(const FVector& v1, const FVector& v2);
 
-	void SpawnTile(const FVector& tileLocation);
-
-	void TraceCheck(const FVector& position);
-
-	bool HasHitObstacle(const FHitResult& hitResult);
 };

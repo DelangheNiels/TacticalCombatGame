@@ -3,6 +3,8 @@
 
 #include "Grid.h"
 #include "GridObstacleVolume.h"
+#include "GridVisualComponent.h"
+#include "GridTile.h"
 
 #include "Components/InstancedStaticMeshComponent.h"
 
@@ -15,8 +17,7 @@ AGrid::AGrid()
 	_rootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneComponent"));
 	SetRootComponent(_rootComponent);
 
-	_instancedGridMesh = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("GridMeshInstance"));
-	_instancedGridMesh->SetupAttachment(_rootComponent);
+	_gridVisualComp = CreateDefaultSubobject<UGridVisualComponent>(TEXT("GridVisualComponent"));
 
 }
 
@@ -47,33 +48,36 @@ void AGrid::SpawnGrid()
 {
 	DestroyGrid();
 
-	_instancedGridMesh->SetStaticMesh(_tileData.FlatMesh);
-	_instancedGridMesh->SetMaterial(0, _tileData.BorderMaterial);
-
 	FVector bottomLeftCornerPosition = CalculateBottomLeftPosition();
 
 	for (int row = 0; row < _rowColumnSize.X; row++)
 	{
 		for (int column = 0; column < _rowColumnSize.Y; column++)
 		{
-			FVector tileLocation = bottomLeftCornerPosition + FVector(_tileSize.X * row, _tileSize.Y * column, 0);
+			FVector tileLocation = bottomLeftCornerPosition + FVector(_gridVisualComp->GetTileSize().X * row, _gridVisualComp->GetTileSize().Y * column, 0);
 
-			if (!_shouldScanEnvironment)
-				SpawnTile(tileLocation);
-			else
-				TraceCheck(tileLocation);
+			AGridTile* tile = _gridVisualComp->CreateTile(tileLocation);
+			if (tile)
+				_gridTiles.Add(tile);
 		}
 	}
+
+	GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Red, FString::Printf(TEXT("Amount of tiles in list: %i"), _gridTiles.Num()));
 }
 
 void AGrid::DestroyGrid()
 {
-	_instancedGridMesh->ClearInstances();
+	for (int i = 0; i < _gridTiles.Num(); i++)
+	{
+		_gridTiles[i]->Destroy();
+	}
+
+	_gridTiles.Empty();
 }
 
 FVector AGrid::CalculateCenterPosition()
 {
-	return SnapVectorToVector(GetActorLocation(), _tileSize);
+	return SnapVectorToVector(GetActorLocation(), _gridVisualComp->GetTileSize());
 }
 
 FVector AGrid::CalculateBottomLeftPosition()
@@ -88,7 +92,7 @@ FVector AGrid::CalculateBottomLeftPosition()
 	if (int(_rowColumnSize.Y) % 2 != 0)
 		--gridSize.Y;
 
-	FVector2D moveDistance = (gridSize / 2) * FVector2D(_tileSize);
+	FVector2D moveDistance = (gridSize / 2) * FVector2D(_gridVisualComp->GetTileSize());
 	FVector bottomLeftCornerPosition = centerLocation - FVector(moveDistance, 0);
 	return bottomLeftCornerPosition;
 }
@@ -103,41 +107,6 @@ FVector AGrid::SnapVectorToVector(const FVector& v1, const FVector& v2)
 	return FVector(x,y,z);
 }
 
-void AGrid::SpawnTile(const FVector& tileLocation)
-{
-	FVector tileScale = _tileSize / _tileData.MeshSize;
-	FTransform tileTransform = FTransform(FRotator::ZeroRotator, tileLocation, tileScale);
-	_instancedGridMesh->AddInstanceWorldSpace(tileTransform);
-}
 
-void AGrid::TraceCheck(const FVector& position)
-{
-	FHitResult hit;
-	//Start trace high up and end low to make sure we hit something
-	FVector traceStart = position + FVector(0,0,1000);
-	FVector traceEnd = position + FVector(0, 0, -1000);
-	FCollisionQueryParams queryParams;
-	queryParams.AddIgnoredActor(this);
-	GetWorld()->LineTraceSingleByChannel(hit, traceStart, traceEnd, _traceChannel, queryParams);
-
-	if (!hit.bBlockingHit || !IsValid(hit.GetActor()) || HasHitObstacle(hit))
-		return; //do not spawn tile when hitting nothing or obstacle
-
-
-	//if hit something, spawn tile at location
-	FVector hitLocation = hit.Location;
-	hitLocation += FVector(0, 0, _tileHeightOffset); //add small offset in height to stop Z-fighting
-	SpawnTile(hitLocation);
-
-}
-
-bool AGrid::HasHitObstacle(const FHitResult& hitResult)
-{
-	AGridObstacleVolume* obstacleVolume = Cast<AGridObstacleVolume>(hitResult.GetActor());
-	if (obstacleVolume)
-		return true;
-
-	return false;
-}
 
 
