@@ -5,6 +5,9 @@
 
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
+
+#include "../Grid/Grid.h"
 
 // Sets default values
 APlayerPawn::APlayerPawn()
@@ -27,6 +30,8 @@ APlayerPawn::APlayerPawn()
 void APlayerPawn::BeginPlay()
 {
 	Super::BeginPlay();
+
+	_grid = Cast<AGrid>(UGameplayStatics::GetActorOfClass(GetWorld(), AGrid::StaticClass()));
 
 	//Make sure camera does not move in when game starts
 	_desiredZoom = _springArm->TargetArmLength;
@@ -52,6 +57,8 @@ void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAxis("ForwardCameraMovement", this ,&APlayerPawn::ForwardCameraMovement);
 	PlayerInputComponent->BindAxis("RightCameraMovement", this, &APlayerPawn::RightCameraMovement);
 	PlayerInputComponent->BindAxis("CameraRotation", this, &APlayerPawn::RotateCamera);
+
+	PlayerInputComponent->BindAction("SelectObject", EInputEvent::IE_Pressed, this, &APlayerPawn::SelectObject);
 }
 
 void APlayerPawn::ZoomCamera(float axisValue)
@@ -97,5 +104,19 @@ void APlayerPawn::SmoothCameraMovement(float deltaTime)
 	SetActorRotation(newRotation);
 	_isRotating = false;
 
+}
+
+void APlayerPawn::SelectObject()
+{
+	//Try selecting grid tile
+	SelectGridTile();
+}
+
+void APlayerPawn::SelectGridTile()
+{
+	if (!_grid)
+		return;
+
+	_grid->SelectTile();
 }
 

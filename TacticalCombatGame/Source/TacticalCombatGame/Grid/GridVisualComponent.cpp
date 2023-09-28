@@ -45,6 +45,63 @@ FVector UGridVisualComponent::GetTileSize() const
 	return _tileSize;
 }
 
+ECollisionChannel UGridVisualComponent::GetGridCollisionChannel() const
+{
+	return _gridTraceChannel;
+}
+
+void UGridVisualComponent::SetTileHoverVisual(AGridTile* tile)
+{
+	if (_hoverdTile == tile)
+		return;
+
+	if (tile == nullptr && _hoverdTile)
+	{
+		_hoverdTile->SetMaterial(_tileData.DefaultMaterial);
+		_hoverdTile = nullptr;
+
+		return;
+	}
+
+	if(tile != _selectedTile)
+		tile->SetMaterial(_tileData.HoveredMaterial);
+
+	//Set previous hoverd tile material back to default material
+	if (_hoverdTile && _hoverdTile != _selectedTile)
+		_hoverdTile->SetMaterial(_tileData.DefaultMaterial);
+
+	_hoverdTile = tile;
+
+}
+
+void UGridVisualComponent::SetTileSelectedVisual(AGridTile* tile)
+{
+	if (!tile && !_selectedTile)
+		return;
+
+	//unselect tile when cliking on it again
+	if (tile == _selectedTile && tile != nullptr)
+	{
+		_selectedTile->SetMaterial(_tileData.HoveredMaterial);
+		_selectedTile = nullptr;
+
+		return;
+	}
+
+	//unselect prev tile 
+	if (_selectedTile)
+	{
+		_selectedTile->SetMaterial(_tileData.DefaultMaterial);
+		_selectedTile = nullptr;
+	}
+
+	if (!tile)
+		return;
+	
+	tile->SetMaterial(_tileData.SelectedMaterial);
+	_selectedTile = tile;
+}
+
 AGridTile* UGridVisualComponent::SpawnTile(const FVector& tileLocation)
 {
 	FVector tileScale = _tileSize / _tileData.MeshSize;

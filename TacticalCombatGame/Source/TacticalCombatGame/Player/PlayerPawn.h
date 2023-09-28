@@ -6,6 +6,8 @@
 #include "GameFramework/Pawn.h"
 #include "PlayerPawn.generated.h"
 
+class AGrid;
+
 UCLASS()
 class TACTICALCOMBATGAME_API APlayerPawn : public APawn
 {
@@ -56,15 +58,26 @@ private:
 	float _desiredYawRotation;
 	bool _isRotating;
 
+	UPROPERTY()
+		AGrid* _grid;
+
 	//Functions
 
+	UFUNCTION()
 	void ZoomCamera(float axisValue);
 
+	UFUNCTION()
 	void ForwardCameraMovement(float axisValue);
+	UFUNCTION()
 	void RightCameraMovement(float axisValue);
 
+	UFUNCTION()
 	void RotateCamera(float axisValue);
 
 	void SmoothCameraMovement(float deltaTime);
+
+	UFUNCTION()
+	void SelectObject();
+	void SelectGridTile();
 
 };

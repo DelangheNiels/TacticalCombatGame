@@ -25,6 +25,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void SelectTile();
+
 private:
 
 	UPROPERTY()
@@ -37,7 +39,10 @@ private:
 		FVector2D _rowColumnSize;
 
 	UPROPERTY()
-		TArray<class AGridTile*> _gridTiles;
+		TMap<FVector,class AGridTile*> _gridTileMap;
+
+	UPROPERTY()
+		APlayerController* _playerController;
 
 	//Functions
 
@@ -50,5 +55,9 @@ private:
 
 	//Used to allign grid with template lines
 	FVector SnapVectorToVector(const FVector& v1, const FVector& v2);
+
+	void CheckTileHover();
+
+	AGridTile* GetTileByLocation(const FVector& location);
 
 };

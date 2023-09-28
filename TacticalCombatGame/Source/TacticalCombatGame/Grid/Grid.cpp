@@ -8,6 +8,8 @@
 
 #include "Components/InstancedStaticMeshComponent.h"
 
+#include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
+
 // Sets default values
 AGrid::AGrid()
 {
@@ -33,6 +35,8 @@ void AGrid::BeginPlay()
 {
 	Super::BeginPlay();
 
+	_playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+
 	SpawnGrid();
 	
 }
@@ -42,6 +46,24 @@ void AGrid::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	CheckTileHover();
+
+}
+
+void AGrid::SelectTile()
+{
+	FHitResult hit;
+	_playerController->GetHitResultUnderCursor(_gridVisualComp->GetGridCollisionChannel(), false, hit);
+
+	//unselect prev tile when clicking out of grid
+	if (!hit.bBlockingHit)
+	{
+		_gridVisualComp->SetTileSelectedVisual(nullptr);
+		return;
+	}
+
+	AGridTile* hoveredTile = GetTileByLocation(hit.GetActor()->GetActorLocation());
+	_gridVisualComp->SetTileSelectedVisual(hoveredTile);
 }
 
 void AGrid::SpawnGrid()
@@ -58,21 +80,19 @@ void AGrid::SpawnGrid()
 
 			AGridTile* tile = _gridVisualComp->CreateTile(tileLocation);
 			if (tile)
-				_gridTiles.Add(tile);
+				_gridTileMap.Add(tile->GetActorLocation(), tile);
 		}
 	}
-
-	GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Red, FString::Printf(TEXT("Amount of tiles in list: %i"), _gridTiles.Num()));
 }
 
 void AGrid::DestroyGrid()
 {
-	for (int i = 0; i < _gridTiles.Num(); i++)
+	for (auto& element : _gridTileMap)
 	{
-		_gridTiles[i]->Destroy();
+		element.Value->Destroy();
 	}
 
-	_gridTiles.Empty();
+	_gridTileMap.Empty();
 }
 
 FVector AGrid::CalculateCenterPosition()
@@ -105,6 +125,27 @@ FVector AGrid::SnapVectorToVector(const FVector& v1, const FVector& v2)
 	float z = FMath::GridSnap(v1.Z, v2.Z);
 
 	return FVector(x,y,z);
+}
+
+void AGrid::CheckTileHover()
+{
+	FHitResult hit;
+	_playerController->GetHitResultUnderCursor(_gridVisualComp->GetGridCollisionChannel(), false, hit);
+
+	//Set prev hovered tile back to normal when moving out of grid
+	if (!hit.bBlockingHit)
+	{
+		_gridVisualComp->SetTileHoverVisual(nullptr);
+		return;
+	}
+
+	AGridTile* hoveredTile = GetTileByLocation(hit.GetActor()->GetActorLocation());
+	_gridVisualComp->SetTileHoverVisual(hoveredTile);
+}
+
+AGridTile* AGrid::GetTileByLocation(const FVector& location)
+{
+	return *_gridTileMap.Find(location);
 }
 
 

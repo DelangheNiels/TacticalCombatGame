@@ -19,13 +19,11 @@ public:
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<class AGridTile> GridTileClass;
 	UPROPERTY(EditAnywhere)
-		UMaterialInstance* MeshMaterial;
+		UMaterialInstance* DefaultMaterial;
 	UPROPERTY(EditAnywhere)
-		UStaticMesh* FlatMesh;
+		UMaterialInstance* HoveredMaterial;
 	UPROPERTY(EditAnywhere)
-		UMaterialInstance* BorderMaterial;
-	UPROPERTY(EditAnywhere)
-		UMaterialInstance* FillMaterial;
+		UMaterialInstance* SelectedMaterial;
 
 };
 
@@ -50,6 +48,11 @@ public:
 
 	FVector GetTileSize() const;
 
+	ECollisionChannel GetGridCollisionChannel() const;
+
+	void SetTileHoverVisual(AGridTile* tile);
+	void SetTileSelectedVisual(AGridTile* tile);
+
 private:
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
@@ -58,7 +61,7 @@ private:
 	UPROPERTY(EditAnywhere)
 		TEnumAsByte<ECollisionChannel> _groundTraceChannel;
 	UPROPERTY(EditAnywhere)
-		TEnumAsByte<ETraceTypeQuery> _gridTraceChannel;
+		TEnumAsByte<ECollisionChannel> _gridTraceChannel;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 		float _tileHeightOffset = 0.05f;
@@ -68,6 +71,11 @@ private:
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 		FVector _tileSize;
+
+	UPROPERTY()
+		AGridTile* _hoverdTile;
+	UPROPERTY()
+		AGridTile* _selectedTile;
 
 	//Functions
 

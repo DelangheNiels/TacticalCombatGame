@@ -30,3 +30,9 @@ void AGridTile::Tick(float DeltaTime)
 
 }
 
+void AGridTile::SetMaterial(UMaterialInstance* material)
+{
+	_staticMeshComp->SetMaterial(0, material);
+}
+
+
