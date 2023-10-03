@@ -52,6 +52,7 @@ public:
 
 	void SetTileHoverVisual(AGridTile* tile);
 	void SetTileSelectedVisual(AGridTile* tile);
+	void SetNeighborVisuals(AGridTile* tile);
 
 private:
 
@@ -76,8 +77,12 @@ private:
 		AGridTile* _hoverdTile;
 	UPROPERTY()
 		AGridTile* _selectedTile;
+	UPROPERTY()
+		TArray<AGridTile*> _visibleNeighbors;
 
 	//Functions
+
+	void ClearNeighbors();
 
 	AGridTile* SpawnTile(const FVector& tileLocation);
 

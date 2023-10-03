@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "Grid.generated.h"
 
+class AGridTile;
+
 UCLASS()
 class TACTICALCOMBATGAME_API AGrid : public AActor
 {
@@ -27,6 +29,9 @@ public:
 
 	void SelectTile();
 
+	TMap<FVector, AGridTile*> GetTileLocationMap() const;
+	TMap<FVector2D, AGridTile*> GetTileIndexMap() const;
+
 private:
 
 	UPROPERTY()
@@ -36,10 +41,17 @@ private:
 		class UGridVisualComponent* _gridVisualComp;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+		//X = rows
+		//Y = column
 		FVector2D _rowColumnSize;
 
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+		bool showNeighbors = true;
+
 	UPROPERTY()
-		TMap<FVector,class AGridTile*> _gridTileMap;
+		TMap<FVector,AGridTile*> _gridTileLocationMap;
+	UPROPERTY()
+		TMap<FVector2D, AGridTile*> _gridTileIndexMap;
 
 	UPROPERTY()
 		APlayerController* _playerController;

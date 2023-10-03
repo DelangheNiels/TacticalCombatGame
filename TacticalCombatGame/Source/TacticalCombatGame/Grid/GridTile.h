@@ -25,6 +25,14 @@ public:
 
 	void SetMaterial(UMaterialInstance* material);
 
+	void SetGridIndex(const FVector2D& gridIndex);
+
+	void AddNeighbor(AGridTile* tile);
+
+	FVector2D GetGridIndex() const;
+
+	TArray<AGridTile*> GetNeighbors() const;
+
 private:
 
 	UPROPERTY(EditInstanceOnly)
@@ -32,5 +40,16 @@ private:
 
 	UPROPERTY(EditInstanceOnly)
 		UStaticMeshComponent* _staticMeshComp;
+
+	UPROPERTY(EditInstanceOnly)
+		class UTextRenderComponent* _debugText;
+
+	UPROPERTY()
+		//X = row index
+		//Y = column index
+		FVector2D _gridIndex;
+
+	UPROPERTY()
+		TArray<AGridTile*> _neighbors;
 
 };

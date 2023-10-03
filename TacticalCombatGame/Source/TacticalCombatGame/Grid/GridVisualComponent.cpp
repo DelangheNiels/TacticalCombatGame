@@ -102,6 +102,30 @@ void UGridVisualComponent::SetTileSelectedVisual(AGridTile* tile)
 	_selectedTile = tile;
 }
 
+void UGridVisualComponent::ClearNeighbors()
+{
+	for (int i = 0; i < _visibleNeighbors.Num(); i++)
+	{
+		_visibleNeighbors[i]->SetMaterial(_tileData.DefaultMaterial);
+	}
+	_visibleNeighbors.Empty();
+}
+
+//show neighbors for this tile
+void UGridVisualComponent::SetNeighborVisuals(AGridTile* tile)
+{
+	ClearNeighbors();
+
+	if (_selectedTile == nullptr)
+		return;
+
+	for (int i = 0; i < tile->GetNeighbors().Num(); i++)
+	{
+		tile->GetNeighbors()[i]->SetMaterial(_tileData.HoveredMaterial);
+		_visibleNeighbors.Add(tile->GetNeighbors()[i]);
+	}
+}
+
 AGridTile* UGridVisualComponent::SpawnTile(const FVector& tileLocation)
 {
 	FVector tileScale = _tileSize / _tileData.MeshSize;
@@ -123,7 +147,6 @@ AGridTile* UGridVisualComponent::TraceCheck(const FVector& position)
 
 	if (!hit.bBlockingHit || !IsValid(hit.GetActor()) || HasHitObstacle(hit))
 		return nullptr; //do not spawn tile when hitting nothing or obstacle
-
 
 	//if hit something, spawn tile at location
 	FVector hitLocation = hit.Location;
