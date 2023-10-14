@@ -33,6 +33,9 @@ public:
 
 	TArray<AGridTile*> GetNeighbors() const;
 
+	bool GetIsCharacterStandingOnTile() const;
+	void SetIsCharacterOnTile(bool isStandingOnTile);
+
 private:
 
 	UPROPERTY(EditInstanceOnly)
@@ -51,5 +54,8 @@ private:
 
 	UPROPERTY()
 		TArray<AGridTile*> _neighbors;
+
+	UPROPERTY()
+		bool _hasCharacterOnTile;
 
 };

@@ -169,7 +169,3 @@ AGridTile* AGrid::GetTileByLocation(const FVector& location)
 {
 	return *_gridTileLocationMap.Find(location);
 }
-
-
-
-

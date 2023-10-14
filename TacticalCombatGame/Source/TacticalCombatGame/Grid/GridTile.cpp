@@ -67,4 +67,14 @@ TArray<AGridTile*> AGridTile::GetNeighbors() const
 	return _neighbors;
 }
 
+bool AGridTile::GetIsCharacterStandingOnTile() const
+{
+	return _hasCharacterOnTile;
+}
+
+void AGridTile::SetIsCharacterOnTile(bool isOnTile)
+{
+	_hasCharacterOnTile = isOnTile;
+}
+
 
