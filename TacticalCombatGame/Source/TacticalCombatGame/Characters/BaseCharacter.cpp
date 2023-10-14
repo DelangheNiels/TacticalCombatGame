@@ -4,6 +4,10 @@
 #include "BaseCharacter.h"
 
 #include "../Grid/GridTile.h"
+#include "../Grid/Grid.h"
+#include "../Pathfinding/GridPathfinding.h"
+
+#include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 
 // Sets default values
 ABaseCharacter::ABaseCharacter()
@@ -16,13 +20,15 @@ ABaseCharacter::ABaseCharacter()
 
 	_mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMeshComponent"));
 	_mesh->SetupAttachment(_rootComponent);
-
 }
 
 // Called when the game starts or when spawned
 void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	_grid = Cast<AGrid>(UGameplayStatics::GetActorOfClass(GetWorld(), AGrid::StaticClass()));
+	_pathfinding = Cast<AGridPathfinding>(UGameplayStatics::GetActorOfClass(GetWorld(), AGridPathfinding::StaticClass()));
 	
 }
 
@@ -41,5 +47,35 @@ AGridTile* ABaseCharacter::GetCurrentTile() const
 void ABaseCharacter::SetCurrentTile(AGridTile* tile)
 {
 	_currentTile = tile;
+	ShowReachableTiles();
+}
+
+void ABaseCharacter::ShowReachableTiles()
+{
+	TArray<AGridTile*> reachableTiles;
+	TArray<AGridTile*> newTiles;
+	reachableTiles.Add(_currentTile);
+	
+	for (int i = 0; i < _totalAmountOfTilesCharCanWalk; i++)
+	{
+		for (int j = 0; j < reachableTiles.Num(); j++)
+		{
+			TArray<AGridTile*> neighbors = reachableTiles[j]->GetNeighbors();
+			
+			for (int k = 0; k < neighbors.Num(); k++)
+			{
+				if (reachableTiles.Contains(neighbors[k]))
+					continue;
+				newTiles.Add(neighbors[k]);
+			}
+		}
+
+		reachableTiles += newTiles;
+	}
+
+	for (int i = 0; i < reachableTiles.Num(); i++)
+	{
+		_grid->SetTileReachable(reachableTiles[i]);
+	}
 }
 

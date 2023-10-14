@@ -25,8 +25,6 @@ void AGridPathfinding::BeginPlay()
 
 	if (!_grid)
 		return;
-
-	SetNeighborsForTiles();
 }
 
 // Called every frame
@@ -75,37 +73,6 @@ TArray<AGridTile*> AGridPathfinding::GeneratePath(AGridTile* startTile, AGridTil
 
 	return path;
 
-}
-
-void AGridPathfinding::SetNeighborsForTiles()
-{
-	TMap<FVector2D, AGridTile*> tileMap = _grid->GetTileIndexMap();
-
-	for (auto& element : tileMap)
-	{
-		auto tile = element.Value;
-		const FVector2D index = tile->GetGridIndex();
-		//top :  x +1
-		tile->AddNeighbor(FindTileByIndex(index + FVector2D(1, 0)));
-		//bottom : x -1
-		tile->AddNeighbor(FindTileByIndex(index + FVector2D(-1, 0)));
-		//left : y - 1
-		tile->AddNeighbor(FindTileByIndex(index + FVector2D(0, -1)));
-		//right : y + 1
-		tile->AddNeighbor(FindTileByIndex(index + FVector2D(0, 1)));
-
-	}
-}
-
-AGridTile* AGridPathfinding::FindTileByIndex(const FVector2D& index)
-{
-	TMap<FVector2D, AGridTile*> tileMap = _grid->GetTileIndexMap();
-
-	auto* tile = tileMap.Find(index);
-	if (tile == nullptr)
-		return nullptr;
-
-	return *tile;
 }
 
 AGridTile* AGridPathfinding::GetTileToCheck(const TArray<AGridTile*>& path, AGridTile* startTile)

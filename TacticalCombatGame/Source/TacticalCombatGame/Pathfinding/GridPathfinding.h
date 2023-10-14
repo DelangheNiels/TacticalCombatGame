@@ -35,10 +35,6 @@ private:
 
 	//Functions
 
-	void SetNeighborsForTiles();
-
-	AGridTile* FindTileByIndex(const FVector2D& index);
-
 	AGridTile* GetTileToCheck(const TArray<AGridTile*>& path, AGridTile* startTile);
 
 	AGridTile* GetClosestNeighborToDestination(const AGridTile& tile, const AGridTile& destination, TArray<AGridTile*>& checkedTiles);

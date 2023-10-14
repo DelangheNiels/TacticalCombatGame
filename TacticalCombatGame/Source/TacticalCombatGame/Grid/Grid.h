@@ -28,6 +28,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void SelectTile();
+	void SetTileReachable(AGridTile* tile);
 
 	TMap<FVector, AGridTile*> GetTileLocationMap() const;
 	TMap<FVector2D, AGridTile*> GetTileIndexMap() const;
@@ -71,5 +72,8 @@ private:
 	void CheckTileHover();
 
 	AGridTile* GetTileByLocation(const FVector& location);
+
+	void SetNeighborsForTiles();
+	AGridTile* FindTileByIndex(const FVector2D& index);
 
 };

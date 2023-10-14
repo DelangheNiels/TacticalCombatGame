@@ -53,6 +53,7 @@ public:
 	void SetTileHoverVisual(AGridTile* tile);
 	void SetTileSelectedVisual(AGridTile* tile);
 	void SetNeighborVisuals(AGridTile* tile);
+	void SetReachableVisual(AGridTile* tile);
 
 private:
 

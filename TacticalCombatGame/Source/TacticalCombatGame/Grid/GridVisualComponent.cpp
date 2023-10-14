@@ -102,6 +102,11 @@ void UGridVisualComponent::SetTileSelectedVisual(AGridTile* tile)
 	_selectedTile = tile;
 }
 
+void UGridVisualComponent::SetReachableVisual(AGridTile* tile)
+{
+	tile->SetMaterial(_tileData.SelectedMaterial);
+}
+
 void UGridVisualComponent::ClearNeighbors()
 {
 	for (int i = 0; i < _visibleNeighbors.Num(); i++)

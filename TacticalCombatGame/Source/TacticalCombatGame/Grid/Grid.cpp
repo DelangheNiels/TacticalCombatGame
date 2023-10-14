@@ -72,6 +72,11 @@ void AGrid::SelectTile()
 		
 }
 
+void AGrid::SetTileReachable(AGridTile* tile)
+{
+	_gridVisualComp->SetReachableVisual(tile);
+}
+
 TMap<FVector, AGridTile*> AGrid::GetTileLocationMap() const
 {
 	return _gridTileLocationMap;
@@ -105,6 +110,8 @@ void AGrid::SpawnGrid()
 			_gridTileLocationMap.Add(tile->GetActorLocation(), tile);
 		}
 	}
+
+	SetNeighborsForTiles();
 }
 
 void AGrid::DestroyGrid()
@@ -169,4 +176,35 @@ void AGrid::CheckTileHover()
 AGridTile* AGrid::GetTileByLocation(const FVector& location)
 {
 	return *_gridTileLocationMap.Find(location);
+}
+
+void AGrid::SetNeighborsForTiles()
+{
+	TMap<FVector2D, AGridTile*> tileMap = GetTileIndexMap();
+
+	for (auto& element : tileMap)
+	{
+		auto tile = element.Value;
+		const FVector2D index = tile->GetGridIndex();
+		//top :  x +1
+		tile->AddNeighbor(FindTileByIndex(index + FVector2D(1, 0)));
+		//bottom : x -1
+		tile->AddNeighbor(FindTileByIndex(index + FVector2D(-1, 0)));
+		//left : y - 1
+		tile->AddNeighbor(FindTileByIndex(index + FVector2D(0, -1)));
+		//right : y + 1
+		tile->AddNeighbor(FindTileByIndex(index + FVector2D(0, 1)));
+
+	}
+}
+
+AGridTile* AGrid::FindTileByIndex(const FVector2D& index)
+{
+	TMap<FVector2D, AGridTile*> tileMap = GetTileIndexMap();
+
+	auto* tile = tileMap.Find(index);
+	if (tile == nullptr)
+		return nullptr;
+
+	return *tile;
 }

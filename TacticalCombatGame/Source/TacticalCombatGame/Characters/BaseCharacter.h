@@ -7,6 +7,8 @@
 #include "BaseCharacter.generated.h"
 
 class AGridTile;
+class AGrid;
+class AGridPathfinding;
 
 UCLASS()
 class TACTICALCOMBATGAME_API ABaseCharacter : public AActor
@@ -36,7 +38,18 @@ private:
 	UPROPERTY(EditInstanceOnly, meta = (AllowPrivateAccess = "true"))
 		USkeletalMeshComponent* _mesh;
 
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+		int _totalAmountOfTilesCharCanWalk = 4;
+	
 	UPROPERTY()
 		AGridTile* _currentTile;
+
+	UPROPERTY()
+		AGrid* _grid;
+	UPROPERTY()
+		AGridPathfinding* _pathfinding;
+
+	//Functions
+	void ShowReachableTiles();
 
 };
