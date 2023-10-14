@@ -110,6 +110,7 @@ void APlayerPawn::SelectObject()
 {
 	//Try selecting grid tile
 	SelectGridTile();
+
 }
 
 void APlayerPawn::SelectGridTile()

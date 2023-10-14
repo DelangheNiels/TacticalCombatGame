@@ -26,6 +26,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	TArray<AGridTile*> GeneratePath(AGridTile* startTile, AGridTile* destinationTile);
+
 private:
 
 	UPROPERTY()
@@ -36,5 +38,11 @@ private:
 	void SetNeighborsForTiles();
 
 	AGridTile* FindTileByIndex(const FVector2D& index);
+
+	AGridTile* GetTileToCheck(const TArray<AGridTile*>& path, AGridTile* startTile);
+
+	AGridTile* GetClosestNeighborToDestination(const AGridTile& tile, const AGridTile& destination, TArray<AGridTile*>& checkedTiles);
+
+	int CalculateDistanceToTarget(const AGridTile& tile, const AGridTile& target);
 
 };

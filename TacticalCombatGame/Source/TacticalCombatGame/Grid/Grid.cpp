@@ -65,6 +65,7 @@ void AGrid::SelectTile()
 	AGridTile* hoveredTile = GetTileByLocation(hit.GetActor()->GetActorLocation());
 	_gridVisualComp->SetTileSelectedVisual(hoveredTile);
 
+	//Used for debuging
 	if (showNeighbors)
 		//show neighbors for this tile
 		_gridVisualComp->SetNeighborVisuals(hoveredTile);
