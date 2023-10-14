@@ -5,9 +5,16 @@
 
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 
 #include "../Grid/Grid.h"
+#include "../Grid/GridTile.h"
+#include "../Pathfinding/GridPathfinding.h"
+#include "../UI/CharacterHUD.h"
+#include "../Characters/BaseCharacter.h"
+
+#include "Blueprint/UserWidget.h"
 
 // Sets default values
 APlayerPawn::APlayerPawn()
@@ -32,11 +39,13 @@ void APlayerPawn::BeginPlay()
 	Super::BeginPlay();
 
 	_grid = Cast<AGrid>(UGameplayStatics::GetActorOfClass(GetWorld(), AGrid::StaticClass()));
-
+	_pathfinding = Cast<AGridPathfinding>(UGameplayStatics::GetActorOfClass(GetWorld(), AGridPathfinding::StaticClass()));
 	//Make sure camera does not move in when game starts
 	_desiredZoom = _springArm->TargetArmLength;
 	_desiredLocation = GetActorLocation();
 	_desiredYawRotation = GetActorRotation().Yaw;
+
+	_playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	
 }
 
@@ -108,16 +117,61 @@ void APlayerPawn::SmoothCameraMovement(float deltaTime)
 
 void APlayerPawn::SelectObject()
 {
+	if (TrySelectingPlayer())
+		return;
+
 	//Try selecting grid tile
-	SelectGridTile();
+	_selectedGridTile = SelectGridTile();
+
+	if (_character && _selectedGridTile)
+	{
+		//set move target where character needs to move to, 
+		//only if character wants to move
+		//and reachable
+		//do this in char self
+
+		//now test to see if a* works
+		auto path = _pathfinding->GeneratePath(_character->GetCurrentTile(), _selectedGridTile);
+		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Red, FString::Printf(TEXT("Path size is: %i"), path.Num()));
+		for (int i = 0; i < path.Num(); i++)
+		{
+			_grid->SetTileReachable(path[i]);
+		}
+	}
 
 }
 
-void APlayerPawn::SelectGridTile()
+AGridTile* APlayerPawn::SelectGridTile()
 {
 	if (!_grid)
-		return;
+		return nullptr;
 
-	_grid->SelectTile();
+	/*if (_character)
+	{
+		_character->HideReachableTiles();
+		_character = nullptr;
+		_characterHud->RemoveFromParent();
+	}*/
+
+	return _grid->SelectTile();
+}
+
+bool APlayerPawn::TrySelectingPlayer()
+{
+	FHitResult hit;
+	_playerController->GetHitResultUnderCursor(_playerTraceChannel, false, hit);
+
+	if (!hit.bBlockingHit)
+		return false;
+
+	//Get selected char
+	_character = Cast<ABaseCharacter>(hit.GetActor());
+	if (!_character)
+		return false;
+
+	_characterHud = Cast<UCharacterHUD>(CreateWidget(GetWorld(), _characterHudRef));
+	_characterHud->SetCharacter(_character);
+	_characterHud->AddToViewport();
+	return true;
 }
 

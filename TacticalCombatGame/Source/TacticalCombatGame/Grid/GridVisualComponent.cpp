@@ -104,7 +104,12 @@ void UGridVisualComponent::SetTileSelectedVisual(AGridTile* tile)
 
 void UGridVisualComponent::SetReachableVisual(AGridTile* tile)
 {
-	tile->SetMaterial(_tileData.SelectedMaterial);
+	tile->SetMaterial(_tileData.HoveredMaterial);
+}
+
+void UGridVisualComponent::ResetVisual(AGridTile* tile)
+{
+	tile->SetMaterial(_tileData.DefaultMaterial);
 }
 
 void UGridVisualComponent::ClearNeighbors()

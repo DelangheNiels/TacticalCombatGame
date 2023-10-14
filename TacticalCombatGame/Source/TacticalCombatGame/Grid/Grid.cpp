@@ -46,11 +46,11 @@ void AGrid::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	CheckTileHover();
+	//CheckTileHover();
 
 }
 
-void AGrid::SelectTile()
+AGridTile* AGrid::SelectTile()
 {
 	FHitResult hit;
 	_playerController->GetHitResultUnderCursor(_gridVisualComp->GetGridCollisionChannel(), false, hit);
@@ -59,7 +59,7 @@ void AGrid::SelectTile()
 	if (!hit.bBlockingHit)
 	{
 		_gridVisualComp->SetTileSelectedVisual(nullptr);
-		return;
+		return nullptr;
 	}
 
 	AGridTile* hoveredTile = GetTileByLocation(hit.GetActor()->GetActorLocation());
@@ -69,12 +69,19 @@ void AGrid::SelectTile()
 	if (showNeighbors)
 		//show neighbors for this tile
 		_gridVisualComp->SetNeighborVisuals(hoveredTile);
+
+	return hoveredTile;
 		
 }
 
 void AGrid::SetTileReachable(AGridTile* tile)
 {
 	_gridVisualComp->SetReachableVisual(tile);
+}
+
+void AGrid::ResetTileVisual(AGridTile* tile)
+{
+	_gridVisualComp->ResetVisual(tile);
 }
 
 TMap<FVector, AGridTile*> AGrid::GetTileLocationMap() const

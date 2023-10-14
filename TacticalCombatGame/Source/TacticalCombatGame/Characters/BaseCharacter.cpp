@@ -47,21 +47,40 @@ AGridTile* ABaseCharacter::GetCurrentTile() const
 void ABaseCharacter::SetCurrentTile(AGridTile* tile)
 {
 	_currentTile = tile;
-	ShowReachableTiles();
 }
 
 void ABaseCharacter::ShowReachableTiles()
 {
+	TArray<AGridTile*> reachableTiles = GetReachableTiles();
+	
+	for (int i = 0; i < reachableTiles.Num(); i++)
+	{
+		_grid->SetTileReachable(reachableTiles[i]);
+	}
+}
+
+void ABaseCharacter::HideReachableTiles()
+{
+	TArray<AGridTile*> reachableTiles = GetReachableTiles();
+
+	for (int i = 0; i < reachableTiles.Num(); i++)
+	{
+		_grid->ResetTileVisual(reachableTiles[i]);
+	}
+}
+
+TArray<AGridTile*> ABaseCharacter::GetReachableTiles()
+{
 	TArray<AGridTile*> reachableTiles;
 	TArray<AGridTile*> newTiles;
 	reachableTiles.Add(_currentTile);
-	
+
 	for (int i = 0; i < _totalAmountOfTilesCharCanWalk; i++)
 	{
 		for (int j = 0; j < reachableTiles.Num(); j++)
 		{
 			TArray<AGridTile*> neighbors = reachableTiles[j]->GetNeighbors();
-			
+
 			for (int k = 0; k < neighbors.Num(); k++)
 			{
 				if (reachableTiles.Contains(neighbors[k]))
@@ -73,9 +92,6 @@ void ABaseCharacter::ShowReachableTiles()
 		reachableTiles += newTiles;
 	}
 
-	for (int i = 0; i < reachableTiles.Num(); i++)
-	{
-		_grid->SetTileReachable(reachableTiles[i]);
-	}
+	return reachableTiles;
 }
 

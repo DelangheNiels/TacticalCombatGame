@@ -27,8 +27,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void SelectTile();
+	AGridTile* SelectTile();
 	void SetTileReachable(AGridTile* tile);
+	void ResetTileVisual(AGridTile* tile);
 
 	TMap<FVector, AGridTile*> GetTileLocationMap() const;
 	TMap<FVector2D, AGridTile*> GetTileIndexMap() const;

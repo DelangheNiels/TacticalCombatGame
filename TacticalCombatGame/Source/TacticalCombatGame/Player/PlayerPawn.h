@@ -7,6 +7,8 @@
 #include "PlayerPawn.generated.h"
 
 class AGrid;
+class AGridTile;
+class AGridPathfinding;
 
 UCLASS()
 class TACTICALCOMBATGAME_API APlayerPawn : public APawn
@@ -60,6 +62,24 @@ private:
 
 	UPROPERTY()
 		AGrid* _grid;
+	UPROPERTY()
+		AGridPathfinding* _pathfinding;
+
+	UPROPERTY()
+		APlayerController* _playerController;
+
+	UPROPERTY(EditAnywhere)
+		TEnumAsByte<ECollisionChannel> _playerTraceChannel;
+
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<class UCharacterHUD> _characterHudRef;
+	UPROPERTY()
+		UCharacterHUD* _characterHud;
+	UPROPERTY()
+		class ABaseCharacter* _character;
+
+	UPROPERTY()
+		AGridTile* _selectedGridTile;
 
 	//Functions
 
@@ -78,6 +98,7 @@ private:
 
 	UFUNCTION()
 	void SelectObject();
-	void SelectGridTile();
+	AGridTile* SelectGridTile();
+	bool TrySelectingPlayer();
 
 };

@@ -58,6 +58,11 @@ TArray<AGridTile*> AGridPathfinding::GeneratePath(AGridTile* startTile, AGridTil
 		//calc dist for each of these tiles to destination
 		//take tile with smallest distance
 		AGridTile* closestTile = GetClosestNeighborToDestination(*tileToCheck, *destinationTile, checkedTiles);
+		if (closestTile == nullptr)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Red, TEXT("Error creating path"));
+			return path;
+		}
 		checkedTiles.Add(tileToCheck);
 		path.Add(closestTile);
 
@@ -85,6 +90,9 @@ AGridTile* AGridPathfinding::GetTileToCheck(const TArray<AGridTile*>& path, AGri
 
 AGridTile* AGridPathfinding::GetClosestNeighborToDestination(const AGridTile& tile, const AGridTile& destination, TArray<AGridTile*>& checkedTiles)
 {
+	if (&tile == nullptr || &destination == nullptr)
+		return nullptr;
+
 	AGridTile* closestTile = nullptr;
 	int closestDistance = MAX_int32;
 
@@ -99,7 +107,7 @@ AGridTile* AGridPathfinding::GetClosestNeighborToDestination(const AGridTile& ti
 
 		int distance = CalculateDistanceToTarget(*tileToCheck, destination);
 
-		if (distance >= closestDistance)
+		if (distance > closestDistance)
 			continue;
 
 		closestDistance = distance;
@@ -111,10 +119,8 @@ AGridTile* AGridPathfinding::GetClosestNeighborToDestination(const AGridTile& ti
 
 int AGridPathfinding::CalculateDistanceToTarget(const AGridTile& tile, const AGridTile& target)
 {
-	//distance is getting calculated by getting the difference between the row and column positions of the 2 tiles
-	int distX = FMath::Abs(target.GetGridIndex().X - tile.GetGridIndex().X);
-	int distY = FMath::Abs(target.GetGridIndex().Y - tile.GetGridIndex().Y);
-	return distX + distY;
+	int cost = FMath::Max(FMath::Abs(tile.GetGridIndex().X - target.GetGridIndex().X), FMath::Abs(tile.GetGridIndex().Y - target.GetGridIndex().Y));
+	return cost;
 }
 
 

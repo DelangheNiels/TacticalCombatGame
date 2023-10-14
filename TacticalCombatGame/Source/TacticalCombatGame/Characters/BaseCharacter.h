@@ -30,6 +30,9 @@ public:
 	AGridTile* GetCurrentTile() const;
 	void SetCurrentTile(AGridTile* tile);
 
+	void ShowReachableTiles();
+	void HideReachableTiles();
+
 private:
 
 	UPROPERTY()
@@ -49,7 +52,9 @@ private:
 	UPROPERTY()
 		AGridPathfinding* _pathfinding;
 
-	//Functions
-	void ShowReachableTiles();
+	// Functions
+
+	TArray<AGridTile*> GetReachableTiles();
+
 
 };
