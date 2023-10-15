@@ -9,6 +9,7 @@
 class AGridTile;
 class AGrid;
 class AGridPathfinding;
+class UHealthComponent;
 
 UCLASS()
 class TACTICALCOMBATGAME_API ABaseCharacter : public AActor
@@ -39,6 +40,8 @@ public:
 
 	void ClearVisuals();
 
+	UHealthComponent* GetHealthComponent() const;
+
 
 private:
 
@@ -68,6 +71,9 @@ private:
 
 	UPROPERTY()
 		TArray<AGridTile*> _reachableTiles;
+
+	UPROPERTY(EditInstanceOnly, meta = (AllowPrivateAccess = "true"))
+		UHealthComponent* _healthComponent;
 
 	// Functions
 

@@ -2,6 +2,7 @@
 
 
 #include "BaseCharacter.h"
+#include "HealthComponent.h"
 
 #include "../Grid/GridTile.h"
 #include "../Grid/Grid.h"
@@ -23,6 +24,8 @@ ABaseCharacter::ABaseCharacter()
 
 	_mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMeshComponent"));
 	_mesh->SetupAttachment(_rootComponent);
+
+	_healthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -106,6 +109,11 @@ void ABaseCharacter::MoveToDestination()
 void ABaseCharacter::ClearVisuals()
 {
 	_grid->ResetGridVisuals();
+}
+
+UHealthComponent* ABaseCharacter::GetHealthComponent() const
+{
+	return _healthComponent;	
 }
 
 void ABaseCharacter::FindReachableTiles()
