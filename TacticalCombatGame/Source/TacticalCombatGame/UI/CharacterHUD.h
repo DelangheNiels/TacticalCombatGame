@@ -8,6 +8,8 @@
 
 class UButton;
 class ABaseCharacter;
+class UTextBlock;
+class UProgressBar;
 
 UCLASS()
 class TACTICALCOMBATGAME_API UCharacterHUD : public UUserWidget
@@ -17,6 +19,7 @@ class TACTICALCOMBATGAME_API UCharacterHUD : public UUserWidget
 public:
 	
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 
 	void SetCharacter(ABaseCharacter* character);
 
@@ -31,6 +34,16 @@ private:
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
 		UButton* _attackButton;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+		UTextBlock* _healthText;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+		UProgressBar* _healthBar;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+		UTextBlock* _movementText;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+		UProgressBar* _movementBar;
 
 	UPROPERTY()
 		ABaseCharacter* _character;
@@ -49,6 +62,11 @@ private:
 	void SetButtonActiveInactive(UButton* button, bool active);
 
 	void ShowDefaultUILayout();
+
+	UFUNCTION()
+	void SetCharacterHealth();
+	UFUNCTION()
+	void SetCharacterMovement();
 
 	
 };

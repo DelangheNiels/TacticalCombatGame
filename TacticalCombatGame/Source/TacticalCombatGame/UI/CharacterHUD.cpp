@@ -4,8 +4,11 @@
 #include "CharacterHUD.h"
 
 #include "../Characters/BaseCharacter.h"
+#include "../Characters/HealthComponent.h"
 
 #include "Components/Button.h"
+#include "Components/TextBlock.h"
+#include "Components/ProgressBar.h"
 
 void UCharacterHUD::NativeConstruct()
 {
@@ -21,9 +24,25 @@ void UCharacterHUD::NativeConstruct()
 	SetButtonActiveInactive(_confirmMoveButton, false);
 }
 
+void UCharacterHUD::NativeDestruct()
+{
+	Super::NativeDestruct();
+
+	_character->OnCharacterMoved.RemoveAll(this);
+	_character->GetHealthComponent()->OnHealthChanged.RemoveAll(this);
+
+	_character = nullptr;
+}
+
 void UCharacterHUD::SetCharacter(ABaseCharacter* character)
 {
 	_character = character;
+
+	_character->OnCharacterMoved.AddUObject(this, &UCharacterHUD::SetCharacterMovement);
+	_character->GetHealthComponent()->OnHealthChanged.AddUObject(this, &UCharacterHUD::SetCharacterHealth);
+
+	SetCharacterHealth();
+	SetCharacterMovement();
 }
 
 void UCharacterHUD::OnMove()
@@ -80,4 +99,21 @@ void UCharacterHUD::ShowDefaultUILayout()
 	SetButtonActiveInactive(_attackButton, true);
 	SetButtonActiveInactive(_cancelMoveButton, false);
 	SetButtonActiveInactive(_confirmMoveButton, false);
+}
+
+void UCharacterHUD::SetCharacterHealth()
+{
+	auto healthComp = _character->GetHealthComponent();
+	FText text = FText::FromString(FString::Printf(TEXT("%i/%i"), int(healthComp->GetCurrentHealth()), int(healthComp->GetMaxHealth())));
+	_healthText->SetText(text);
+
+	_healthBar->SetPercent(healthComp->GetCurrentHealth() / healthComp->GetMaxHealth());
+}
+
+void UCharacterHUD::SetCharacterMovement()
+{
+	FText text = FText::FromString(FString::Printf(TEXT("%i/%i"), _character->GetCurrentAmountOfMovement(), _character->GetTotalAmountOfMovement()));
+	_movementText->SetText(text);
+
+	_movementBar->SetPercent(float(_character->GetCurrentAmountOfMovement()) / float(_character->GetTotalAmountOfMovement()));
 }

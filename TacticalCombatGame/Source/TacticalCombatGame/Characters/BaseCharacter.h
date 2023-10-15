@@ -11,6 +11,8 @@ class AGrid;
 class AGridPathfinding;
 class UHealthComponent;
 
+DECLARE_MULTICAST_DELEGATE(FOnCharacterMoved);
+
 UCLASS()
 class TACTICALCOMBATGAME_API ABaseCharacter : public AActor
 {
@@ -35,6 +37,8 @@ public:
 	void HideReachableTiles();
 
 	void OnSelected();
+	void OnDeselected();
+
 	void CreatePathToDestination(const AGridTile& destination);
 	void MoveToDestination();
 
@@ -42,6 +46,10 @@ public:
 
 	UHealthComponent* GetHealthComponent() const;
 
+	int GetTotalAmountOfMovement() const;
+	int GetCurrentAmountOfMovement() const;
+
+	FOnCharacterMoved OnCharacterMoved;
 
 private:
 
@@ -53,6 +61,8 @@ private:
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 		int _totalAmountOfTilesCharCanWalk = 4;
+	int _currentAmountOfTilesCharCanWalk;
+	int _currentPathSize;
 	
 	UPROPERTY()
 		AGridTile* _currentTile;

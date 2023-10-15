@@ -36,6 +36,7 @@ void ABaseCharacter::BeginPlay()
 	_grid = Cast<AGrid>(UGameplayStatics::GetActorOfClass(GetWorld(), AGrid::StaticClass()));
 	_pathfinding = Cast<AGridPathfinding>(UGameplayStatics::GetActorOfClass(GetWorld(), AGridPathfinding::StaticClass()));
 	
+	_currentAmountOfTilesCharCanWalk = _totalAmountOfTilesCharCanWalk;
 }
 
 // Called every frame
@@ -80,9 +81,15 @@ void ABaseCharacter::OnSelected()
 	_characterHud->AddToViewport();
 }
 
+void ABaseCharacter::OnDeselected()
+{
+	_characterHud->RemoveFromParent();
+	_characterHud = nullptr;
+}
+
 void ABaseCharacter::CreatePathToDestination(const AGridTile& destination)
 {
-	if (!IsTileReachable(destination))
+	if (!IsTileReachable(destination) || _currentAmountOfTilesCharCanWalk < 1)
 		return;
 
 	HideReachableTiles();
@@ -92,6 +99,7 @@ void ABaseCharacter::CreatePathToDestination(const AGridTile& destination)
 	if (path.Num() <= 0)
 		return;
 
+	_currentPathSize = path.Num() - 1;
 	_destinationTile = const_cast<AGridTile*>(&destination);
 }
 
@@ -102,8 +110,12 @@ void ABaseCharacter::MoveToDestination()
 
 	SetActorLocation(_destinationTile->GetActorLocation());
 	_currentTile = _destinationTile;
+	_currentAmountOfTilesCharCanWalk -= _currentPathSize;
+	_currentPathSize = 0;
 
 	_destinationTile = nullptr;
+
+	OnCharacterMoved.Broadcast();
 }
 
 void ABaseCharacter::ClearVisuals()
@@ -116,6 +128,16 @@ UHealthComponent* ABaseCharacter::GetHealthComponent() const
 	return _healthComponent;	
 }
 
+int ABaseCharacter::GetTotalAmountOfMovement() const
+{
+	return _totalAmountOfTilesCharCanWalk;
+}
+
+int ABaseCharacter::GetCurrentAmountOfMovement() const
+{
+	return _currentAmountOfTilesCharCanWalk;
+}
+
 void ABaseCharacter::FindReachableTiles()
 {
 	_reachableTiles.Empty();
@@ -123,7 +145,7 @@ void ABaseCharacter::FindReachableTiles()
 	TArray<AGridTile*> newTiles;
 	_reachableTiles.Add(_currentTile);
 
-	for (int i = 0; i < _totalAmountOfTilesCharCanWalk; i++)
+	for (int i = 0; i < _currentAmountOfTilesCharCanWalk; i++)
 	{
 		for (int j = 0; j < _reachableTiles.Num(); j++)
 		{

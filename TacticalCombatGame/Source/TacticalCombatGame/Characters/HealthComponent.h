@@ -6,6 +6,9 @@
 #include "Components/ActorComponent.h"
 #include "HealthComponent.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnHealthChanged);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnDied, UHealthComponent*)
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class TACTICALCOMBATGAME_API UHealthComponent : public UActorComponent
@@ -23,7 +26,11 @@ protected:
 public:	
 
 	float GetCurrentHealth() const;
+	float GetMaxHealth() const;
 	void TakeDamage(float damage);
+
+	FOnHealthChanged OnHealthChanged;
+	FOnDied OnDied;
 
 private:
 

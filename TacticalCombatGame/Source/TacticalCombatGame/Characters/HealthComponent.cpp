@@ -28,11 +28,21 @@ float UHealthComponent::GetCurrentHealth() const
 	return _currentHealth;
 }
 
+float UHealthComponent::GetMaxHealth() const
+{
+	return _maxhealth;
+}
+
 void UHealthComponent::TakeDamage(float damage)
 {
 	_currentHealth -= damage;
 
-	if (_currentHealth <= 0)
-		GetOwner()->Destroy();
+	OnHealthChanged.Broadcast();
+
+	if (_currentHealth > 0)
+		return;
+
+	OnDied.Broadcast(this);
+	GetOwner()->Destroy();
 }
 

@@ -94,6 +94,10 @@ private:
 
 	UFUNCTION()
 	void SelectObject();
+
+	UFUNCTION()
+		void DeselectObject();
+
 	AGridTile* SelectGridTile();
 	bool TrySelectingPlayer();
 

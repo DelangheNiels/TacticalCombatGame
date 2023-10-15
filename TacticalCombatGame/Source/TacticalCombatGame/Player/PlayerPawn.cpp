@@ -65,6 +65,7 @@ void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAxis("CameraRotation", this, &APlayerPawn::RotateCamera);
 
 	PlayerInputComponent->BindAction("SelectObject", EInputEvent::IE_Pressed, this, &APlayerPawn::SelectObject);
+	PlayerInputComponent->BindAction("DeselectObject", EInputEvent::IE_Pressed, this, &APlayerPawn::DeselectObject);
 }
 
 void APlayerPawn::ZoomCamera(float axisValue)
@@ -125,6 +126,15 @@ void APlayerPawn::SelectObject()
 		_character->CreatePathToDestination(*_selectedGridTile);
 	}
 
+}
+
+void APlayerPawn::DeselectObject()
+{
+	if (!_character)
+		return;
+
+	_character->OnDeselected();
+	_character = nullptr;
 }
 
 AGridTile* APlayerPawn::SelectGridTile()
