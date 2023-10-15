@@ -98,6 +98,11 @@ private:
 	UFUNCTION()
 		void DeselectObject();
 
+	UFUNCTION()
+		void RotateSelectedCharacterLeft();
+	UFUNCTION()
+		void RotateSelectedCharacterRight();
+
 	AGridTile* SelectGridTile();
 	bool TrySelectingPlayer();
 

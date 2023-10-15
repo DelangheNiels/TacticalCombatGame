@@ -63,7 +63,9 @@ void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAxis("ForwardCameraMovement", this ,&APlayerPawn::ForwardCameraMovement);
 	PlayerInputComponent->BindAxis("RightCameraMovement", this, &APlayerPawn::RightCameraMovement);
 	PlayerInputComponent->BindAxis("CameraRotation", this, &APlayerPawn::RotateCamera);
-
+	
+	PlayerInputComponent->BindAction("RotateCharacterLeft", EInputEvent::IE_Pressed,this, &APlayerPawn::RotateSelectedCharacterLeft);
+	PlayerInputComponent->BindAction("RotateCharacterRight", EInputEvent::IE_Pressed, this, &APlayerPawn::RotateSelectedCharacterRight);
 	PlayerInputComponent->BindAction("SelectObject", EInputEvent::IE_Pressed, this, &APlayerPawn::SelectObject);
 	PlayerInputComponent->BindAction("DeselectObject", EInputEvent::IE_Pressed, this, &APlayerPawn::DeselectObject);
 }
@@ -137,6 +139,29 @@ void APlayerPawn::DeselectObject()
 	_character = nullptr;
 }
 
+void APlayerPawn::RotateSelectedCharacterLeft()
+{
+	if (!_character)
+		return;
+
+	FRotator characterRotation = _character->GetActorRotation();
+	characterRotation.Yaw -= 90;
+
+	_character->SetActorRotation(characterRotation);
+}
+
+void APlayerPawn::RotateSelectedCharacterRight()
+{
+	if (!_character)
+		return;
+
+	FRotator characterRotation = _character->GetActorRotation();
+	characterRotation.Yaw += 90;
+
+	_character->SetActorRotation(characterRotation);
+}
+
+
 AGridTile* APlayerPawn::SelectGridTile()
 {
 	if (!_grid)
@@ -152,6 +177,10 @@ bool APlayerPawn::TrySelectingPlayer()
 
 	if (!hit.bBlockingHit)
 		return false;
+
+	//Deselect the previously selected character
+	if (_character)
+		_character->OnDeselected();
 
 	//Get selected char
 	_character = Cast<ABaseCharacter>(hit.GetActor());
