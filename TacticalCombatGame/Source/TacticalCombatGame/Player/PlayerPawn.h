@@ -71,10 +71,6 @@ private:
 	UPROPERTY(EditAnywhere)
 		TEnumAsByte<ECollisionChannel> _playerTraceChannel;
 
-	UPROPERTY(EditAnywhere)
-		TSubclassOf<class UCharacterHUD> _characterHudRef;
-	UPROPERTY()
-		UCharacterHUD* _characterHud;
 	UPROPERTY()
 		class ABaseCharacter* _character;
 

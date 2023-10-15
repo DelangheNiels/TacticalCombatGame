@@ -33,6 +33,9 @@ private:
 	UPROPERTY()
 		AGrid* _grid;
 
+	UPROPERTY()
+		TArray<AGridTile*> _visiblePath;
+
 	//Functions
 
 	AGridTile* GetTileToCheck(const TArray<AGridTile*>& path, AGridTile* startTile);
@@ -40,5 +43,7 @@ private:
 	AGridTile* GetClosestNeighborToDestination(const AGridTile& tile, const AGridTile& destination, TArray<AGridTile*>& checkedTiles);
 
 	int CalculateDistanceToTarget(const AGridTile& tile, const AGridTile& target);
+
+	void ShowPath(TArray<AGridTile*> path);
 
 };

@@ -84,6 +84,14 @@ void AGrid::ResetTileVisual(AGridTile* tile)
 	_gridVisualComp->ResetVisual(tile);
 }
 
+void AGrid::ResetGridVisuals()
+{
+	for (int i = 0; i < _tiles.Num(); i++)
+	{
+		ResetTileVisual(_tiles[i]);
+	}
+}
+
 TMap<FVector, AGridTile*> AGrid::GetTileLocationMap() const
 {
 	return _gridTileLocationMap;
@@ -113,6 +121,7 @@ void AGrid::SpawnGrid()
 
 			FVector2D index = FVector2D(row, column);
 			tile->SetGridIndex(index);
+			_tiles.Add(tile);
 			_gridTileIndexMap.Add(index, tile);
 			_gridTileLocationMap.Add(tile->GetActorLocation(), tile);
 		}
@@ -128,6 +137,7 @@ void AGrid::DestroyGrid()
 		element.Value->Destroy();
 	}
 
+	_tiles.Empty();
 	_gridTileIndexMap.Empty();
 	_gridTileLocationMap.Empty();
 }

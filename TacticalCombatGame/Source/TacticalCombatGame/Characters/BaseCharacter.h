@@ -33,6 +33,13 @@ public:
 	void ShowReachableTiles();
 	void HideReachableTiles();
 
+	void OnSelected();
+	void CreatePathToDestination(const AGridTile& destination);
+	void MoveToDestination();
+
+	void ClearVisuals();
+
+
 private:
 
 	UPROPERTY()
@@ -46,15 +53,27 @@ private:
 	
 	UPROPERTY()
 		AGridTile* _currentTile;
+	UPROPERTY()
+		AGridTile* _destinationTile;
 
 	UPROPERTY()
 		AGrid* _grid;
 	UPROPERTY()
 		AGridPathfinding* _pathfinding;
 
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<class UCharacterHUD> _characterHudRef;
+	UPROPERTY()
+		UCharacterHUD* _characterHud;
+
+	UPROPERTY()
+		TArray<AGridTile*> _reachableTiles;
+
 	// Functions
 
-	TArray<AGridTile*> GetReachableTiles();
+	void FindReachableTiles();
+
+	bool IsTileReachable(const AGridTile& tile);
 
 
 };

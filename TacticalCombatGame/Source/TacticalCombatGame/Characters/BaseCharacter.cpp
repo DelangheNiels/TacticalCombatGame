@@ -6,6 +6,9 @@
 #include "../Grid/GridTile.h"
 #include "../Grid/Grid.h"
 #include "../Pathfinding/GridPathfinding.h"
+#include "../UI/CharacterHUD.h"
+
+#include "Blueprint/UserWidget.h"
 
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 
@@ -51,47 +54,91 @@ void ABaseCharacter::SetCurrentTile(AGridTile* tile)
 
 void ABaseCharacter::ShowReachableTiles()
 {
-	TArray<AGridTile*> reachableTiles = GetReachableTiles();
-	
-	for (int i = 0; i < reachableTiles.Num(); i++)
+	FindReachableTiles();
+
+	for (int i = 0; i < _reachableTiles.Num(); i++)
 	{
-		_grid->SetTileReachable(reachableTiles[i]);
+		_grid->SetTileReachable(_reachableTiles[i]);
 	}
 }
 
 void ABaseCharacter::HideReachableTiles()
 {
-	TArray<AGridTile*> reachableTiles = GetReachableTiles();
-
-	for (int i = 0; i < reachableTiles.Num(); i++)
+	for (int i = 0; i < _reachableTiles.Num(); i++)
 	{
-		_grid->ResetTileVisual(reachableTiles[i]);
+		_grid->ResetTileVisual(_reachableTiles[i]);
 	}
 }
 
-TArray<AGridTile*> ABaseCharacter::GetReachableTiles()
+void ABaseCharacter::OnSelected()
 {
-	TArray<AGridTile*> reachableTiles;
+	_characterHud = Cast<UCharacterHUD>(CreateWidget(GetWorld(), _characterHudRef));
+	_characterHud->SetCharacter(this);
+	_characterHud->AddToViewport();
+}
+
+void ABaseCharacter::CreatePathToDestination(const AGridTile& destination)
+{
+	if (!IsTileReachable(destination))
+		return;
+
+	HideReachableTiles();
+
+	//create path
+	auto path = _pathfinding->GeneratePath(_currentTile, const_cast<AGridTile*>(&destination));
+	if (path.Num() <= 0)
+		return;
+
+	_destinationTile = const_cast<AGridTile*>(&destination);
+}
+
+void ABaseCharacter::MoveToDestination()
+{
+	if (_destinationTile == nullptr)
+		return;
+
+	SetActorLocation(_destinationTile->GetActorLocation());
+	_currentTile = _destinationTile;
+
+	_destinationTile = nullptr;
+}
+
+void ABaseCharacter::ClearVisuals()
+{
+	_grid->ResetGridVisuals();
+}
+
+void ABaseCharacter::FindReachableTiles()
+{
+	_reachableTiles.Empty();
+
 	TArray<AGridTile*> newTiles;
-	reachableTiles.Add(_currentTile);
+	_reachableTiles.Add(_currentTile);
 
 	for (int i = 0; i < _totalAmountOfTilesCharCanWalk; i++)
 	{
-		for (int j = 0; j < reachableTiles.Num(); j++)
+		for (int j = 0; j < _reachableTiles.Num(); j++)
 		{
-			TArray<AGridTile*> neighbors = reachableTiles[j]->GetNeighbors();
+			TArray<AGridTile*> neighbors = _reachableTiles[j]->GetNeighbors();
 
 			for (int k = 0; k < neighbors.Num(); k++)
 			{
-				if (reachableTiles.Contains(neighbors[k]))
+				if (_reachableTiles.Contains(neighbors[k]))
 					continue;
 				newTiles.Add(neighbors[k]);
 			}
 		}
 
-		reachableTiles += newTiles;
+		_reachableTiles += newTiles;
 	}
 
-	return reachableTiles;
+}
+
+bool ABaseCharacter::IsTileReachable(const AGridTile& tile)
+{
+	if(&tile == nullptr || !_reachableTiles.Contains(&tile))
+		return false;
+
+	return true;
 }
 

@@ -24,6 +24,10 @@ private:
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
 		UButton* _moveButton;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+		UButton* _cancelMoveButton;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+		UButton* _confirmMoveButton;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
 		UButton* _attackButton;
@@ -34,9 +38,17 @@ private:
 	//Functions
 	UFUNCTION()
 		void OnMove();
+	UFUNCTION()
+		void OnCancelMovement();
+	UFUNCTION()
+		void OnConfirmMovement();
 
 	UFUNCTION()
 		void OnAttack();
+
+	void SetButtonActiveInactive(UButton* button, bool active);
+
+	void ShowDefaultUILayout();
 
 	
 };

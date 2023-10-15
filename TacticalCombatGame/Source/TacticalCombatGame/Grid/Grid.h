@@ -30,6 +30,7 @@ public:
 	AGridTile* SelectTile();
 	void SetTileReachable(AGridTile* tile);
 	void ResetTileVisual(AGridTile* tile);
+	void ResetGridVisuals();
 
 	TMap<FVector, AGridTile*> GetTileLocationMap() const;
 	TMap<FVector2D, AGridTile*> GetTileIndexMap() const;
@@ -50,6 +51,8 @@ private:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 		bool showNeighbors = true;
 
+	UPROPERTY()
+		TArray<AGridTile*> _tiles;
 	UPROPERTY()
 		TMap<FVector,AGridTile*> _gridTileLocationMap;
 	UPROPERTY()

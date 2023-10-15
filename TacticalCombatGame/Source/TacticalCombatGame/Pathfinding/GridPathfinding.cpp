@@ -76,6 +76,8 @@ TArray<AGridTile*> AGridPathfinding::GeneratePath(AGridTile* startTile, AGridTil
 
 	checkedTiles.Empty();
 
+	ShowPath(path);
+
 	return path;
 
 }
@@ -121,6 +123,23 @@ int AGridPathfinding::CalculateDistanceToTarget(const AGridTile& tile, const AGr
 {
 	int cost = FMath::Max(FMath::Abs(tile.GetGridIndex().X - target.GetGridIndex().X), FMath::Abs(tile.GetGridIndex().Y - target.GetGridIndex().Y));
 	return cost;
+}
+
+void AGridPathfinding::ShowPath(TArray<AGridTile*> path)
+{
+	//clear prev path
+	for (int i = 0; i < _visiblePath.Num(); i++)
+	{
+		_grid->ResetTileVisual(_visiblePath[i]);
+	}
+
+	_visiblePath.Empty();
+	_visiblePath = path;
+
+	for (int i = 0; i < _visiblePath.Num(); i++)
+	{
+		_grid->SetTileReachable(_visiblePath[i]);
+	}
 }
 
 
