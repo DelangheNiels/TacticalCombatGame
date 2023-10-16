@@ -10,6 +10,7 @@ class AGridTile;
 class AGrid;
 class AGridPathfinding;
 class UHealthComponent;
+class UAttackComponent;
 
 DECLARE_MULTICAST_DELEGATE(FOnCharacterMoved);
 
@@ -45,6 +46,7 @@ public:
 	void ClearVisuals();
 
 	UHealthComponent* GetHealthComponent() const;
+	UAttackComponent* GetAttackComponent() const;
 
 	int GetTotalAmountOfMovement() const;
 	int GetCurrentAmountOfMovement() const;
@@ -82,8 +84,12 @@ private:
 	UPROPERTY()
 		TArray<AGridTile*> _reachableTiles;
 
-	UPROPERTY(EditInstanceOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditInstanceOnly)
 		UHealthComponent* _healthComponent;
+
+	UPROPERTY(EditInstanceOnly)
+		UAttackComponent* _attackComponent;
+
 
 	// Functions
 

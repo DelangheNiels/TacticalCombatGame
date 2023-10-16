@@ -4,6 +4,8 @@
 #include "BaseCharacter.h"
 #include "HealthComponent.h"
 
+#include "Attacks/AttackComponent.h"
+
 #include "../Grid/GridTile.h"
 #include "../Grid/Grid.h"
 #include "../Pathfinding/GridPathfinding.h"
@@ -26,6 +28,8 @@ ABaseCharacter::ABaseCharacter()
 	_mesh->SetupAttachment(_rootComponent);
 
 	_healthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+
+	_attackComponent = CreateDefaultSubobject<UAttackComponent>(TEXT("AttackComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -126,6 +130,11 @@ void ABaseCharacter::ClearVisuals()
 UHealthComponent* ABaseCharacter::GetHealthComponent() const
 {
 	return _healthComponent;	
+}
+
+UAttackComponent* ABaseCharacter::GetAttackComponent() const
+{
+	return _attackComponent;
 }
 
 int ABaseCharacter::GetTotalAmountOfMovement() const

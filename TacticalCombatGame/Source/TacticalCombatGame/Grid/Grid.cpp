@@ -36,8 +36,6 @@ void AGrid::BeginPlay()
 	Super::BeginPlay();
 
 	_playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-
-	SpawnGrid();
 	
 }
 
@@ -67,8 +65,10 @@ AGridTile* AGrid::SelectTile()
 
 	//Used for debuging
 	if (showNeighbors)
+	{
 		//show neighbors for this tile
 		_gridVisualComp->SetNeighborVisuals(hoveredTile);
+	}
 
 	return hoveredTile;
 		
@@ -97,15 +97,10 @@ TMap<FVector, AGridTile*> AGrid::GetTileLocationMap() const
 	return _gridTileLocationMap;
 }
 
-TMap<FVector2D, AGridTile*> AGrid::GetTileIndexMap() const
-{
-	return _gridTileIndexMap;
-}
 
 void AGrid::SpawnGrid()
 {
 	DestroyGrid();
-
 	FVector bottomLeftCornerPosition = CalculateBottomLeftPosition();
 
 	for (int row = 0; row < _rowColumnSize.X; row++)
@@ -121,9 +116,8 @@ void AGrid::SpawnGrid()
 
 			FVector2D index = FVector2D(row, column);
 			tile->SetGridIndex(index);
-			_tiles.Add(tile);
-			_gridTileIndexMap.Add(index, tile);
 			_gridTileLocationMap.Add(tile->GetActorLocation(), tile);
+			_tiles.Add(tile);
 		}
 	}
 
@@ -138,7 +132,6 @@ void AGrid::DestroyGrid()
 	}
 
 	_tiles.Empty();
-	_gridTileIndexMap.Empty();
 	_gridTileLocationMap.Empty();
 }
 
@@ -197,12 +190,12 @@ AGridTile* AGrid::GetTileByLocation(const FVector& location)
 
 void AGrid::SetNeighborsForTiles()
 {
-	TMap<FVector2D, AGridTile*> tileMap = GetTileIndexMap();
-
-	for (auto& element : tileMap)
+	for (int i = 0; i < _tiles.Num(); i++)
 	{
-		auto tile = element.Value;
+		AGridTile* tile = _tiles[i];
+
 		const FVector2D index = tile->GetGridIndex();
+
 		//top :  x +1
 		tile->AddNeighbor(FindTileByIndex(index + FVector2D(1, 0)));
 		//bottom : x -1
@@ -211,17 +204,18 @@ void AGrid::SetNeighborsForTiles()
 		tile->AddNeighbor(FindTileByIndex(index + FVector2D(0, -1)));
 		//right : y + 1
 		tile->AddNeighbor(FindTileByIndex(index + FVector2D(0, 1)));
-
 	}
 }
 
 AGridTile* AGrid::FindTileByIndex(const FVector2D& index)
 {
-	TMap<FVector2D, AGridTile*> tileMap = GetTileIndexMap();
+	for (int i = 0; i < _tiles.Num(); i++)
+	{
+		if (_tiles[i]->GetGridIndex().Equals(index))
+		{
+			return _tiles[i];
+		}	
+	}
 
-	auto* tile = tileMap.Find(index);
-	if (tile == nullptr)
-		return nullptr;
-
-	return *tile;
+	return nullptr;
 }

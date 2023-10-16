@@ -33,7 +33,8 @@ public:
 	void ResetGridVisuals();
 
 	TMap<FVector, AGridTile*> GetTileLocationMap() const;
-	TMap<FVector2D, AGridTile*> GetTileIndexMap() const;
+
+	AGridTile* FindTileByIndex(const FVector2D& index);
 
 private:
 
@@ -55,8 +56,6 @@ private:
 		TArray<AGridTile*> _tiles;
 	UPROPERTY()
 		TMap<FVector,AGridTile*> _gridTileLocationMap;
-	UPROPERTY()
-		TMap<FVector2D, AGridTile*> _gridTileIndexMap;
 
 	UPROPERTY()
 		APlayerController* _playerController;
@@ -78,6 +77,5 @@ private:
 	AGridTile* GetTileByLocation(const FVector& location);
 
 	void SetNeighborsForTiles();
-	AGridTile* FindTileByIndex(const FVector2D& index);
 
 };

@@ -34,6 +34,10 @@ private:
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
 		UButton* _attackButton;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+		UButton* _cancelAttackButton;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+		UButton* _confirmAttackButton;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
 		UTextBlock* _healthText;
@@ -58,6 +62,10 @@ private:
 
 	UFUNCTION()
 		void OnAttack();
+	UFUNCTION()
+		void OnCancelAttack();
+	UFUNCTION()
+		void OnConfirmAttack();
 
 	void SetButtonActiveInactive(UButton* button, bool active);
 

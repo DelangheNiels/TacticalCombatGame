@@ -5,6 +5,9 @@
 
 #include "../Characters/BaseCharacter.h"
 #include "../Characters/HealthComponent.h"
+#include "../Characters/Attacks/AttackComponent.h"
+
+#include "../Grid/GridTile.h"
 
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
@@ -19,9 +22,10 @@ void UCharacterHUD::NativeConstruct()
 	_cancelMoveButton->OnClicked.AddDynamic(this, &UCharacterHUD::OnCancelMovement);
 
 	_attackButton->OnClicked.AddDynamic(this, &UCharacterHUD::OnAttack);
+	_cancelAttackButton->OnClicked.AddDynamic(this, &UCharacterHUD::OnCancelAttack);
+	_confirmAttackButton->OnClicked.AddDynamic(this, &UCharacterHUD::OnConfirmAttack);
 
-	SetButtonActiveInactive(_cancelMoveButton, false);
-	SetButtonActiveInactive(_confirmMoveButton, false);
+	ShowDefaultUILayout();
 }
 
 void UCharacterHUD::NativeDestruct()
@@ -78,8 +82,35 @@ void UCharacterHUD::OnAttack()
 
 	_character->HideReachableTiles();
 
-	//show tile to deal damage to
-	//show confirm button
+	_character->GetAttackComponent()->ShowTilesToAttack(_character->GetCurrentTile()->GetGridIndex(), (FVector2D)_character->GetActorForwardVector());
+
+	SetButtonActiveInactive(_moveButton, false);
+	SetButtonActiveInactive(_attackButton, false);
+	SetButtonActiveInactive(_cancelAttackButton, true);
+	SetButtonActiveInactive(_confirmAttackButton, true);
+
+}
+
+void UCharacterHUD::OnCancelAttack()
+{
+	if (!_character)
+		return;
+
+	_character->GetAttackComponent()->HideTilesToAttack();
+
+	ShowDefaultUILayout();
+}
+
+void UCharacterHUD::OnConfirmAttack()
+{
+	if (!_character)
+		return;
+
+	_character->GetAttackComponent()->DoAttack();
+	_character->GetAttackComponent()->HideTilesToAttack();
+	
+	ShowDefaultUILayout();
+
 }
 
 void UCharacterHUD::SetButtonActiveInactive(UButton* button, bool active)
@@ -99,6 +130,8 @@ void UCharacterHUD::ShowDefaultUILayout()
 	SetButtonActiveInactive(_attackButton, true);
 	SetButtonActiveInactive(_cancelMoveButton, false);
 	SetButtonActiveInactive(_confirmMoveButton, false);
+	SetButtonActiveInactive(_cancelAttackButton, false);
+	SetButtonActiveInactive(_confirmAttackButton, false);
 }
 
 void UCharacterHUD::SetCharacterHealth()

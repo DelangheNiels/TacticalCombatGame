@@ -49,9 +49,9 @@ void AGridTile::SetGridIndex(const FVector2D& gridIndex)
 
 void AGridTile::AddNeighbor(AGridTile* tile)
 {
-	if (tile == nullptr ||_neighbors.Contains(tile))
+	if (tile == nullptr || _neighbors.Contains(tile))
 		return;
-
+	
 	_neighbors.Add(tile);
 }
 
