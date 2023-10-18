@@ -3,6 +3,9 @@
 
 #include "BaseAttack.h"
 
+#include "../BaseCharacter.h"
+#include "../HealthComponent.h"
+
 #include "../../Grid/Grid.h"
 #include "../../Grid/GridTile.h"
 
@@ -31,9 +34,41 @@ void UBaseAttack::Attack(float damage)
 		return;
 
 	//see if there is a char on the tile, if so deal damage to it
+	for (int i = 0; i < _tilesToAttack.Num(); i++)
+	{
+		auto tile = _tilesToAttack[i];
+
+		if (tile == nullptr)
+			continue;
+
+		ABaseCharacter* hitCharacter = TryGettingCharacterOnTile(*tile);
+		if (!hitCharacter)
+			continue;
+
+		hitCharacter->GetHealthComponent()->TakeDamage(damage);
+	}
+	
 }
 
 void UBaseAttack::SetGrid(AGrid* grid)
 {
 	_grid = grid;
+}
+
+ABaseCharacter* UBaseAttack::TryGettingCharacterOnTile(const AGridTile& tile)
+{
+	FVector position = tile.GetActorLocation();
+
+	FHitResult hit;
+
+	FVector traceStart = position + FVector(0, 0, 1000);
+	FVector traceEnd = position + FVector(0, 0, -1000);
+	FCollisionQueryParams queryParams;
+
+	GetWorld()->LineTraceSingleByChannel(hit, traceStart, traceEnd, _characterTraceChannel, queryParams);
+
+	if (!hit.bBlockingHit)
+		return nullptr;
+
+	return Cast<ABaseCharacter>(hit.GetActor());
 }
