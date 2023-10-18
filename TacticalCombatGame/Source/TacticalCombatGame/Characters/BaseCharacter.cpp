@@ -113,8 +113,13 @@ void ABaseCharacter::MoveToDestination()
 	if (_destinationTile == nullptr)
 		return;
 
+	_currentTile->SetIsCharacterOnTile(false);
+
 	SetActorLocation(_destinationTile->GetActorLocation());
+
 	_currentTile = _destinationTile;
+	_currentTile->SetIsCharacterOnTile(true);
+
 	_currentAmountOfTilesCharCanWalk -= _currentPathSize;
 	_currentPathSize = 0;
 
@@ -163,7 +168,7 @@ void ABaseCharacter::FindReachableTiles()
 
 			for (int k = 0; k < neighbors.Num(); k++)
 			{
-				if (_reachableTiles.Contains(neighbors[k]))
+				if (_reachableTiles.Contains(neighbors[k]) || neighbors[k]->GetIsCharacterStandingOnTile())
 					continue;
 				newTiles.Add(neighbors[k]);
 			}
