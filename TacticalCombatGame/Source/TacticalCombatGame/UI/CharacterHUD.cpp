@@ -34,16 +34,20 @@ void UCharacterHUD::NativeDestruct()
 
 	_character->OnCharacterMoved.RemoveAll(this);
 	_character->GetHealthComponent()->OnHealthChanged.RemoveAll(this);
+	_character->OnCharacterRotated.RemoveAll(this);
 
 	_character = nullptr;
+	_charAttackComp = nullptr;
 }
 
 void UCharacterHUD::SetCharacter(ABaseCharacter* character)
 {
 	_character = character;
+	_charAttackComp = character->GetAttackComponent();
 
 	_character->OnCharacterMoved.AddUObject(this, &UCharacterHUD::SetCharacterMovement);
 	_character->GetHealthComponent()->OnHealthChanged.AddUObject(this, &UCharacterHUD::SetCharacterHealth);
+	_character->OnCharacterRotated.AddUObject(this, &UCharacterHUD::OnCharacterRotated);
 
 	SetCharacterHealth();
 	SetCharacterMovement();
@@ -72,17 +76,20 @@ void UCharacterHUD::OnConfirmMovement()
 {
 	ShowDefaultUILayout();
 
+	if (!_character)
+		return;
+
 	_character->MoveToDestination();
 }
 
 void UCharacterHUD::OnAttack()
 {
-	if (!_character)
+	if (!_character || !_charAttackComp)
 		return;
 
 	_character->HideReachableTiles();
 
-	_character->GetAttackComponent()->ShowTilesToAttack(_character->GetCurrentTile()->GetGridIndex(), (FVector2D)_character->GetActorForwardVector());
+	_charAttackComp->ShowTilesToAttack(_character->GetCurrentTile()->GetGridIndex(), (FVector2D)_character->GetActorForwardVector());
 
 	SetButtonActiveInactive(_moveButton, false);
 	SetButtonActiveInactive(_attackButton, false);
@@ -93,21 +100,21 @@ void UCharacterHUD::OnAttack()
 
 void UCharacterHUD::OnCancelAttack()
 {
-	if (!_character)
+	if (!_charAttackComp)
 		return;
 
-	_character->GetAttackComponent()->HideTilesToAttack();
+	_charAttackComp->HideTilesToAttack();
 
 	ShowDefaultUILayout();
 }
 
 void UCharacterHUD::OnConfirmAttack()
 {
-	if (!_character)
+	if (!_charAttackComp)
 		return;
 
-	_character->GetAttackComponent()->DoAttack();
-	_character->GetAttackComponent()->HideTilesToAttack();
+	_charAttackComp->DoAttack();
+	_charAttackComp->HideTilesToAttack();
 	
 	ShowDefaultUILayout();
 
@@ -124,18 +131,24 @@ void UCharacterHUD::SetButtonActiveInactive(UButton* button, bool active)
 
 void UCharacterHUD::ShowDefaultUILayout()
 {
-	_character->ClearVisuals();
-
 	SetButtonActiveInactive(_moveButton, true);
 	SetButtonActiveInactive(_attackButton, true);
 	SetButtonActiveInactive(_cancelMoveButton, false);
 	SetButtonActiveInactive(_confirmMoveButton, false);
 	SetButtonActiveInactive(_cancelAttackButton, false);
 	SetButtonActiveInactive(_confirmAttackButton, false);
+
+	if (!_character)
+		return;
+
+	_character->ClearVisuals();
 }
 
 void UCharacterHUD::SetCharacterHealth()
 {
+	if (!_character)
+		return;
+
 	auto healthComp = _character->GetHealthComponent();
 	FText text = FText::FromString(FString::Printf(TEXT("%i/%i"), int(healthComp->GetCurrentHealth()), int(healthComp->GetMaxHealth())));
 	_healthText->SetText(text);
@@ -149,4 +162,16 @@ void UCharacterHUD::SetCharacterMovement()
 	_movementText->SetText(text);
 
 	_movementBar->SetPercent(float(_character->GetCurrentAmountOfMovement()) / float(_character->GetTotalAmountOfMovement()));
+}
+
+void UCharacterHUD::OnCharacterRotated()
+{
+	if (!_character || !_charAttackComp || !_charAttackComp->GetWantsToAttack())
+		return;
+
+	//hide previous tile
+	_charAttackComp->HideTilesToAttack();
+
+	//show new tiles to attack
+	_charAttackComp->ShowTilesToAttack(_character->GetCurrentTile()->GetGridIndex(), (FVector2D)_character->GetActorForwardVector());
 }

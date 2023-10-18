@@ -12,7 +12,6 @@ void UBaseAttack::ShowTilesToAttack(const FVector2D& currentTileIndex, const FVe
 
 	_tilesToAttack = FindTilesToAttack(currentTileIndex, characterForwardVector);
 
-	//use grid to show tile visuals
 	for (int i = 0; i < _tilesToAttack.Num(); i++)
 	{
 		_grid->SetTileReachable(_tilesToAttack[i]);
@@ -21,7 +20,6 @@ void UBaseAttack::ShowTilesToAttack(const FVector2D& currentTileIndex, const FVe
 
 void UBaseAttack::HideTilesToAttack()
 {
-	//use grid visuals to remove tile visuals
 	_grid->ResetGridVisuals();
 
 	_tilesToAttack.Empty();

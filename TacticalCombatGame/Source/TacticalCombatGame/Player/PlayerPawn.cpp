@@ -148,6 +148,7 @@ void APlayerPawn::RotateSelectedCharacterLeft()
 	characterRotation.Yaw -= 90;
 
 	_character->SetActorRotation(characterRotation);
+	_character->OnCharacterRotated.Broadcast();
 }
 
 void APlayerPawn::RotateSelectedCharacterRight()
@@ -159,6 +160,7 @@ void APlayerPawn::RotateSelectedCharacterRight()
 	characterRotation.Yaw += 90;
 
 	_character->SetActorRotation(characterRotation);
+	_character->OnCharacterRotated.Broadcast();
 }
 
 

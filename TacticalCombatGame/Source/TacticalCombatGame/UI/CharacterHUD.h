@@ -10,6 +10,7 @@ class UButton;
 class ABaseCharacter;
 class UTextBlock;
 class UProgressBar;
+class UAttackComponent;
 
 UCLASS()
 class TACTICALCOMBATGAME_API UCharacterHUD : public UUserWidget
@@ -52,6 +53,9 @@ private:
 	UPROPERTY()
 		ABaseCharacter* _character;
 
+	UPROPERTY()
+		UAttackComponent* _charAttackComp;
+
 	//Functions
 	UFUNCTION()
 		void OnMove();
@@ -72,9 +76,11 @@ private:
 	void ShowDefaultUILayout();
 
 	UFUNCTION()
-	void SetCharacterHealth();
+		void SetCharacterHealth();
 	UFUNCTION()
-	void SetCharacterMovement();
+		void SetCharacterMovement();
+	UFUNCTION()
+		void OnCharacterRotated();
 
 	
 };

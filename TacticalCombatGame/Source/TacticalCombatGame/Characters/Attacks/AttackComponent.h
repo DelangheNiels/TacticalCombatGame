@@ -25,6 +25,8 @@ public:
 	void ShowTilesToAttack(const FVector2D& currentTileIndex, const FVector2D& characterForwardVector);
 	void DoAttack();
 	void HideTilesToAttack();
+	bool GetWantsToAttack() const;
+	void StopAttacking();
 
 private:
 
@@ -36,4 +38,7 @@ private:
 	
 	UPROPERTY()
 		UBaseAttack* _attack;
+
+	UPROPERTY()
+		bool _wantsToAttack;
 };

@@ -39,6 +39,7 @@ void UAttackComponent::ShowTilesToAttack(const FVector2D& currentTileIndex, cons
 	if (!_attack)
 		return;
 
+	_wantsToAttack = true;
 	_attack->ShowTilesToAttack(currentTileIndex, characterForwardVector);
 }
 
@@ -47,6 +48,7 @@ void UAttackComponent::DoAttack()
 	if (!_attack)
 		return;
 
+	_wantsToAttack = false;
 	_attack->Attack(_damage);
 }
 
@@ -55,6 +57,17 @@ void UAttackComponent::HideTilesToAttack()
 	if (!_attack)
 		return;
 
+	_wantsToAttack = false;
 	_attack->HideTilesToAttack();
+}
+
+bool UAttackComponent::GetWantsToAttack() const
+{
+	return _wantsToAttack;
+}
+
+void UAttackComponent::StopAttacking()
+{
+	_wantsToAttack = false;
 }
 

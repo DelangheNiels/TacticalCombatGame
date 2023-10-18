@@ -13,6 +13,7 @@ class UHealthComponent;
 class UAttackComponent;
 
 DECLARE_MULTICAST_DELEGATE(FOnCharacterMoved);
+DECLARE_MULTICAST_DELEGATE(FOnCharacterRotated);
 
 UCLASS()
 class TACTICALCOMBATGAME_API ABaseCharacter : public AActor
@@ -52,6 +53,7 @@ public:
 	int GetCurrentAmountOfMovement() const;
 
 	FOnCharacterMoved OnCharacterMoved;
+	FOnCharacterRotated OnCharacterRotated;
 
 private:
 

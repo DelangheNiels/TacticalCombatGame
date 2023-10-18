@@ -87,6 +87,7 @@ void ABaseCharacter::OnSelected()
 
 void ABaseCharacter::OnDeselected()
 {
+	_attackComponent->StopAttacking();
 	_characterHud->RemoveFromParent();
 	_characterHud = nullptr;
 }
