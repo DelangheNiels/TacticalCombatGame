@@ -37,6 +37,13 @@ private:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 		float _maxhealth;
 
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<class UDamageNumber> _damageNumberHudRef;
+
 	float _currentHealth;
+
+	//Functions
+
+	void SpawnDamageNumber(float damage);
 		
 };

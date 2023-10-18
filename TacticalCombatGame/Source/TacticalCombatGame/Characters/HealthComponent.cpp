@@ -3,6 +3,10 @@
 
 #include "HealthComponent.h"
 
+#include "../UI/DamageNumber.h"
+
+#include "Blueprint/UserWidget.h"
+
 // Sets default values for this component's properties
 UHealthComponent::UHealthComponent()
 {
@@ -37,6 +41,8 @@ void UHealthComponent::TakeDamage(float damage)
 {
 	_currentHealth -= damage;
 
+	SpawnDamageNumber(damage);
+
 	OnHealthChanged.Broadcast();
 
 	if (_currentHealth > 0)
@@ -44,5 +50,12 @@ void UHealthComponent::TakeDamage(float damage)
 
 	OnDied.Broadcast(this);
 	GetOwner()->Destroy();
+}
+
+void UHealthComponent::SpawnDamageNumber(float damage)
+{
+	auto damageNumber = Cast<UDamageNumber>(CreateWidget(GetWorld(), _damageNumberHudRef));
+	damageNumber->Instantiate(damage, GetOwner()->GetActorLocation());
+	damageNumber->AddToViewport();
 }
 
