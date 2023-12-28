@@ -5,6 +5,7 @@
 
 #include "../Characters/BaseCharacter.h"
 #include "../Characters/HealthComponent.h"
+#include "../Characters/GridMovementComponent.h"
 #include "../Characters/Attacks/AttackComponent.h"
 
 #include "../Grid/GridTile.h"
@@ -32,7 +33,10 @@ void UCharacterHUD::NativeDestruct()
 {
 	Super::NativeDestruct();
 
-	_character->OnCharacterMoved.RemoveAll(this);
+	_character->OnCharacterLocked.RemoveAll(this);
+	_character->OnCharacterReset.RemoveAll(this);
+	_character->GetGridMovementComponent()->OnCharacterMoved.RemoveAll(this);
+	_character->GetGridMovementComponent()->OnCharacterStopedMoving.RemoveAll(this);
 	_character->GetHealthComponent()->OnHealthChanged.RemoveAll(this);
 	_character->OnCharacterRotated.RemoveAll(this);
 
@@ -43,14 +47,21 @@ void UCharacterHUD::NativeDestruct()
 void UCharacterHUD::SetCharacter(ABaseCharacter* character)
 {
 	_character = character;
-	_charAttackComp = character->GetAttackComponent();
 
-	_character->OnCharacterMoved.AddUObject(this, &UCharacterHUD::SetCharacterMovement);
+	_charAttackComp = character->GetAttackComponent();
+	
+	_character->OnCharacterLocked.AddUObject(this, &UCharacterHUD::OnCharacterLocked);
+	_character->OnCharacterReset.AddUObject(this, &UCharacterHUD::OnCharacterReset);
+	_character->GetGridMovementComponent()->OnCharacterMoved.AddUObject(this, &UCharacterHUD::SetCharacterMovement);
+	_character->GetGridMovementComponent()->OnCharacterMoved.AddUObject(this, &UCharacterHUD::DisableInput);
+	_character->GetGridMovementComponent()->OnCharacterStopedMoving.AddUObject(this, &UCharacterHUD::EnableInput);
 	_character->GetHealthComponent()->OnHealthChanged.AddUObject(this, &UCharacterHUD::SetCharacterHealth);
 	_character->OnCharacterRotated.AddUObject(this, &UCharacterHUD::OnCharacterRotated);
 
 	SetCharacterHealth();
 	SetCharacterMovement();
+
+	ShowDefaultUILayout();
 }
 
 void UCharacterHUD::OnMove()
@@ -63,7 +74,7 @@ void UCharacterHUD::OnMove()
 	SetButtonActiveInactive(_cancelMoveButton, true);
 	SetButtonActiveInactive(_confirmMoveButton, true);
 	
-	_character->ShowReachableTiles();
+	_character->GetGridMovementComponent()->ShowReachableTiles();
 }
 
 void UCharacterHUD::OnCancelMovement()
@@ -79,7 +90,7 @@ void UCharacterHUD::OnConfirmMovement()
 	if (!_character)
 		return;
 
-	_character->MoveToDestination();
+	_character->GetGridMovementComponent()->MoveToDestination();
 }
 
 void UCharacterHUD::OnAttack()
@@ -87,9 +98,9 @@ void UCharacterHUD::OnAttack()
 	if (!_character || !_charAttackComp)
 		return;
 
-	_character->HideReachableTiles();
+	_character->GetGridMovementComponent()->HideReachableTiles();
 
-	_charAttackComp->ShowTilesToAttack(_character->GetCurrentTile()->GetGridIndex(), (FVector2D)_character->GetActorForwardVector());
+	_charAttackComp->ShowTilesToAttack(_character->GetGridMovementComponent()->GetCurrentTile()->GetGridIndex(), (FVector2D)_character->GetActorForwardVector());
 
 	SetButtonActiveInactive(_moveButton, false);
 	SetButtonActiveInactive(_attackButton, false);
@@ -138,10 +149,22 @@ void UCharacterHUD::ShowDefaultUILayout()
 	SetButtonActiveInactive(_cancelAttackButton, false);
 	SetButtonActiveInactive(_confirmAttackButton, false);
 
+	if (_isLocked || !_character->GetIsControlledByPlayer())
+	{
+		DisableInput();
+		return;
+	}
+
+	if (_charAttackComp->GetHasAttacked())
+		_attackButton->SetIsEnabled(false);
+
+	if (_character->GetGridMovementComponent()->GetCurrentAmountOfMovement() == 0)
+		_moveButton->SetIsEnabled(false);
+
 	if (!_character)
 		return;
 
-	_character->ClearVisuals();
+	_character->GetGridMovementComponent()->ClearVisuals();
 }
 
 void UCharacterHUD::SetCharacterHealth()
@@ -158,10 +181,12 @@ void UCharacterHUD::SetCharacterHealth()
 
 void UCharacterHUD::SetCharacterMovement()
 {
-	FText text = FText::FromString(FString::Printf(TEXT("%i/%i"), _character->GetCurrentAmountOfMovement(), _character->GetTotalAmountOfMovement()));
+	FText text = FText::FromString(FString::Printf(TEXT("%i/%i"), _character->GetGridMovementComponent()->GetCurrentAmountOfMovement(), _character->GetGridMovementComponent()->GetTotalAmountOfMovement()));
 	_movementText->SetText(text);
 
-	_movementBar->SetPercent(float(_character->GetCurrentAmountOfMovement()) / float(_character->GetTotalAmountOfMovement()));
+	_movementBar->SetPercent(float(_character->GetGridMovementComponent()->GetCurrentAmountOfMovement()) / float(_character->GetGridMovementComponent()->GetTotalAmountOfMovement()));
+
+
 }
 
 void UCharacterHUD::OnCharacterRotated()
@@ -173,5 +198,36 @@ void UCharacterHUD::OnCharacterRotated()
 	_charAttackComp->HideTilesToAttack();
 
 	//show new tiles to attack
-	_charAttackComp->ShowTilesToAttack(_character->GetCurrentTile()->GetGridIndex(), (FVector2D)_character->GetActorForwardVector());
+	_charAttackComp->ShowTilesToAttack(_character->GetGridMovementComponent()->GetCurrentTile()->GetGridIndex(), (FVector2D)_character->GetActorForwardVector());
 }
+
+void UCharacterHUD::DisableInput()
+{
+	_moveButton->SetIsEnabled(false);
+	_attackButton->SetIsEnabled(false);
+}
+
+void UCharacterHUD::EnableInput()
+{
+	_moveButton->SetIsEnabled(true);
+	_attackButton->SetIsEnabled(true);
+
+	if (_charAttackComp->GetHasAttacked())
+		_attackButton->SetIsEnabled(false);
+
+	if (_character->GetGridMovementComponent()->GetCurrentAmountOfMovement() == 0)
+		_moveButton->SetIsEnabled(false);
+}
+
+void UCharacterHUD::OnCharacterReset()
+{
+	EnableInput();
+	_isLocked = false;
+}
+
+void UCharacterHUD::OnCharacterLocked()
+{
+	DisableInput();
+	_isLocked = true;
+}
+

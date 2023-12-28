@@ -10,8 +10,14 @@
 
 #include "../Grid/Grid.h"
 #include "../Grid/GridTile.h"
+
 #include "../Pathfinding/GridPathfinding.h"
+
 #include "../Characters/BaseCharacter.h"
+#include "../Characters/GridMovementComponent.h"
+#include "../Characters/HealthComponent.h"
+
+#include "../TacticalCombatGameGameModeBase.h"
 
 // Sets default values
 APlayerPawn::APlayerPawn()
@@ -43,6 +49,16 @@ void APlayerPawn::BeginPlay()
 	_desiredYawRotation = GetActorRotation().Yaw;
 
 	_playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+
+	GetAllCharactersToControl();
+
+	_gamemode = Cast<ATacticalCombatGameGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+
+	if (!_gamemode)
+		return;
+
+	//let game mode know that player is spawned in
+	_gamemode->CreatePlayerStates(this);
 	
 }
 
@@ -68,6 +84,23 @@ void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("RotateCharacterRight", EInputEvent::IE_Pressed, this, &APlayerPawn::RotateSelectedCharacterRight);
 	PlayerInputComponent->BindAction("SelectObject", EInputEvent::IE_Pressed, this, &APlayerPawn::SelectObject);
 	PlayerInputComponent->BindAction("DeselectObject", EInputEvent::IE_Pressed, this, &APlayerPawn::DeselectObject);
+}
+
+void APlayerPawn::ResetControlledCharacters()
+{
+	for (int i = 0; i < _charactersToControl.Num(); i++)
+	{
+		_charactersToControl[i]->Reset();
+		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Green, TEXT("Resetting char"));
+	}
+}
+
+void APlayerPawn::LockControlledCharacters()
+{
+	for (int i = 0; i < _charactersToControl.Num(); i++)
+	{
+		_charactersToControl[i]->Lock();
+	}
 }
 
 void APlayerPawn::ZoomCamera(float axisValue)
@@ -125,7 +158,7 @@ void APlayerPawn::SelectObject()
 
 	if (_character && _selectedGridTile)
 	{
-		_character->CreatePathToDestination(*_selectedGridTile);
+		_character->GetGridMovementComponent()->CreatePathToDestination(*_selectedGridTile);
 	}
 
 }
@@ -192,5 +225,35 @@ bool APlayerPawn::TrySelectingPlayer()
 	_character->OnSelected();
 	
 	return true;
+}
+
+void APlayerPawn::GetAllCharactersToControl()
+{
+	TArray<AActor*> foundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABaseCharacter::StaticClass(), foundActors);
+
+	if (foundActors.Num() <= 0)
+		return;
+
+	for (int i = 0; i < foundActors.Num(); i++)
+	{
+		auto character = Cast<ABaseCharacter>(foundActors[i]);
+
+		if (character->GetIsControlledByPlayer())
+			_charactersToControl.Add(character);
+	}
+}
+
+void APlayerPawn::OnControlledCharacterDie(UHealthComponent* healthcomp)
+{
+	healthcomp->OnDied.RemoveAll(this);
+
+	auto character = Cast<ABaseCharacter>(healthcomp->GetOwner());
+
+	if (!character)
+		return;
+
+	_charactersToControl.Remove(character);
+
 }
 

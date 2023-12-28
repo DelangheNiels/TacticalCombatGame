@@ -38,4 +38,7 @@ private:
 	void SpawnCharacter();
 
 	AGridTile* GetTileToSpawnPlayerOn();
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+		bool _isControlledByPlayer;
 };

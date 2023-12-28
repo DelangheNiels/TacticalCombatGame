@@ -12,7 +12,10 @@ TArray<AGridTile*> UMeleeAttack::FindTilesToAttack(const FVector2D& currentTileI
 
 	FVector2D targetTileIndex = currentTileIndex + characterForwardVector;
 
-	AGridTile* tile = _grid->FindTileByIndex(targetTileIndex);
+	//round index to avoid wrong floating point numbers
+	FVector2D inTargetTileIndex = FVector2D(FMath::RoundHalfFromZero(targetTileIndex.X), FMath::RoundHalfFromZero(targetTileIndex.Y));
+
+	AGridTile* tile = _grid->FindTileByIndex(inTargetTileIndex);
 
 	if (tile)
 		tilesToAttack.Add(tile);

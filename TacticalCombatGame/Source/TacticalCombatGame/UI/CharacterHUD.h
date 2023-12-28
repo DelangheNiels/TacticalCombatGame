@@ -56,6 +56,8 @@ private:
 	UPROPERTY()
 		UAttackComponent* _charAttackComp;
 
+	bool _isLocked;
+
 	//Functions
 	UFUNCTION()
 		void OnMove();
@@ -81,6 +83,16 @@ private:
 		void SetCharacterMovement();
 	UFUNCTION()
 		void OnCharacterRotated();
+
+	UFUNCTION()
+		void DisableInput();
+	UFUNCTION()
+		void EnableInput();
+
+	UFUNCTION()
+		void OnCharacterReset();
+	UFUNCTION()
+		void OnCharacterLocked();
 
 	
 };

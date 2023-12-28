@@ -86,6 +86,9 @@ void AGrid::ResetTileVisual(AGridTile* tile)
 
 void AGrid::ResetGridVisuals()
 {
+	if (_tiles.Num() <= 0)
+		return;
+
 	for (int i = 0; i < _tiles.Num(); i++)
 	{
 		ResetTileVisual(_tiles[i]);

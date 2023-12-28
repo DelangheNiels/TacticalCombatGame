@@ -27,6 +27,8 @@ public:
 	void HideTilesToAttack();
 	bool GetWantsToAttack() const;
 	void StopAttacking();
+	bool GetHasAttacked() const;
+	void Reset();
 
 private:
 
@@ -41,4 +43,6 @@ private:
 
 	UPROPERTY()
 		bool _wantsToAttack;
+
+	bool _hasAttacked;
 };

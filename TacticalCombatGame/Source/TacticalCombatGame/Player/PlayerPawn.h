@@ -9,6 +9,8 @@
 class AGrid;
 class AGridTile;
 class AGridPathfinding;
+class UHealthComponent;
+class ATacticalCombatGameGameModeBase;
 
 UCLASS()
 class TACTICALCOMBATGAME_API APlayerPawn : public APawn
@@ -29,6 +31,9 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void ResetControlledCharacters();
+	void LockControlledCharacters();
 
 private:
 
@@ -77,6 +82,12 @@ private:
 	UPROPERTY()
 		AGridTile* _selectedGridTile;
 
+	UPROPERTY()
+		TArray<ABaseCharacter*> _charactersToControl;
+
+	UPROPERTY()
+		ATacticalCombatGameGameModeBase* _gamemode;
+
 	//Functions
 
 	UFUNCTION()
@@ -105,5 +116,8 @@ private:
 
 	AGridTile* SelectGridTile();
 	bool TrySelectingPlayer();
+
+	void GetAllCharactersToControl();
+	void OnControlledCharacterDie(UHealthComponent* healthcomp);
 
 };

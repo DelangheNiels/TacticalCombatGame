@@ -49,6 +49,7 @@ void UAttackComponent::DoAttack()
 		return;
 
 	_wantsToAttack = false;
+	_hasAttacked = true;
 	_attack->Attack(_damage);
 }
 
@@ -69,5 +70,15 @@ bool UAttackComponent::GetWantsToAttack() const
 void UAttackComponent::StopAttacking()
 {
 	_wantsToAttack = false;
+}
+
+bool UAttackComponent::GetHasAttacked() const
+{
+	return _hasAttacked;
+}
+
+void UAttackComponent::Reset()
+{
+	_hasAttacked = false;
 }
 

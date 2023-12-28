@@ -3,6 +3,7 @@
 
 #include "CharacterSpawner.h"
 #include "BaseCharacter.h"
+#include "GridMovementComponent.h"
 
 #include "../Grid/GridTile.h"
 
@@ -38,7 +39,9 @@ void ACharacterSpawner::SpawnCharacter()
 
 	auto character = GetWorld()->SpawnActor<ABaseCharacter>(_characterToSpawn, tile->GetActorLocation(), characterRotation);
 
-	character->SetCurrentTile(tile);
+	character->SetIsControlledByPlayer(_isControlledByPlayer);
+
+	character->GetGridMovementComponent()->SetCurrentTile(tile);
 	tile->SetIsCharacterOnTile(true);
 }
 
