@@ -5,10 +5,17 @@
 
 #include "../Characters/BaseCharacter.h"
 #include "../Characters/HealthComponent.h"
+#include "../Characters/GridMovementComponent.h"
+#include "../Characters/Attacks/AttackComponent.h"
+
+#include "../Grid/GridTile.h"
 
 #include "../TacticalCombatGameGameModeBase.h"
 
 #include "Kismet/GameplayStatics.h"
+
+#include "Math/NumericLimits.h"
+#include <Runtime/Engine/Classes/Kismet/KismetMathLibrary.h>
 
 // Sets default values
 AEnemyPlayer::AEnemyPlayer()
@@ -32,6 +39,8 @@ void AEnemyPlayer::BeginPlay()
 
 	//let game mode know that enemy player is spawned in
 	_gamemode->CreateEnemyPlayerStates(this);
+
+
 	
 }
 
@@ -44,7 +53,7 @@ void AEnemyPlayer::Tick(float DeltaTime)
 
 void AEnemyPlayer::ControlCharacters()
 {
-	GetWorld()->GetTimerManager().SetTimer(_controlCharactersTimer, this, &AEnemyPlayer::ControlNextCharacter, 2.0f, true);
+	GetWorld()->GetTimerManager().SetTimer(_controlCharactersTimer, this, &AEnemyPlayer::ControlNextCharacter, 1.5f, true);
 }
 
 void AEnemyPlayer::ResetControlledCharacters()
@@ -75,6 +84,11 @@ void AEnemyPlayer::GetAllCharactersToControl()
 			_charactersToControl.Add(character);
 			character->GetHealthComponent()->OnDied.AddUObject(this, &AEnemyPlayer::OnControlledCharacterDie);
 		}
+		else
+		{
+			_opponentCharacters.Add(character);
+			character->GetHealthComponent()->OnDied.AddUObject(this, &AEnemyPlayer::OnOpponentCharacterDied);
+		}
 	}
 }
 
@@ -90,6 +104,18 @@ void AEnemyPlayer::OnControlledCharacterDie(UHealthComponent* healthcomp)
 	_charactersToControl.Remove(character);
 }
 
+void AEnemyPlayer::OnOpponentCharacterDied(UHealthComponent* healthcomp)
+{
+	healthcomp->OnDied.RemoveAll(this);
+
+	auto character = Cast<ABaseCharacter>(healthcomp->GetOwner());
+
+	if (!character)
+		return;
+
+	_opponentCharacters.Remove(character);
+}
+
 void AEnemyPlayer::ControlNextCharacter()
 {
 	if (_charactersToControl.Num() <= 0)
@@ -103,13 +129,159 @@ void AEnemyPlayer::ControlNextCharacter()
 
 	ABaseCharacter* character = _charactersToControl[0];
 
-	//move
-	//see if attack
-	//see if can move back
+	auto closestOpponentTile = FindTileClosestOpponentTileToControlledChar(character);
+	if (!closestOpponentTile)
+		return;
+
+	if (!character->GetAttackComponent()->GetAttackableTiles(character->GetGridMovementComponent()->GetCurrentTile()).Contains(closestOpponentTile))
+	{
+		TryMovingCharacter(character, closestOpponentTile);
+	}
+	else
+	{
+		auto closestOpponent = FindClosestOpponentToControlledChar(character);
+		TryDealingDamage(character, closestOpponent);
+	}
 
 	_charactersToControl.Remove(character);
 	_controlledCharacters.Add(character);
-
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Controlling character"));
 }
+
+AGridTile* AEnemyPlayer::FindTileClosestOpponentTileToControlledChar(ABaseCharacter* character) const
+{
+	auto closestChar = FindClosestOpponentToControlledChar(character);
+	if(!closestChar)
+		return nullptr;
+
+	return closestChar->GetGridMovementComponent()->GetCurrentTile();
+}
+
+ABaseCharacter* AEnemyPlayer::FindClosestOpponentToControlledChar(ABaseCharacter* character) const
+{
+	if (_opponentCharacters.Num() <= 0)
+		return nullptr;
+
+	float closestDistance = TNumericLimits<float>::Max();
+	ABaseCharacter* closestCharacter = nullptr;
+
+	for (int i = 0; i < _opponentCharacters.Num(); i++)
+	{
+		float distance = FVector::Distance(character->GetActorLocation(), _opponentCharacters[i]->GetGridMovementComponent()->GetCurrentTile()->GetActorLocation());
+		if (distance <= closestDistance)
+		{
+			closestDistance = distance;
+			closestCharacter = _opponentCharacters[i];
+		}
+	}
+
+	return closestCharacter;
+}
+
+bool AEnemyPlayer::IsOpponentTileInAttackRange(AGridTile* opponentTile, ABaseCharacter* character,AGridTile*& tileToAttackOpponent)
+{
+	bool result = false;	
+	TArray<AGridTile*> reachableTiles = character->GetGridMovementComponent()->GetReachableTiles();
+	TArray<AGridTile*> attackableTiles;
+
+	//look at each tile and see what tiles it can attack
+	for (int i = 0; i < reachableTiles.Num(); i++)
+	{
+		attackableTiles = character->GetAttackComponent()->GetAttackableTiles(reachableTiles[i]);
+
+		for (int j = 0; j < attackableTiles.Num(); j++)
+		{
+			if (attackableTiles[j] == opponentTile)
+			{
+				tileToAttackOpponent = reachableTiles[i];
+				result = true;
+				break;
+			}
+		}
+	}
+
+	return result;
+}
+
+AGridTile* AEnemyPlayer::GetClosestReachableTileToOpponentTile(ABaseCharacter* character, AGridTile* opponentTile)
+{
+	TArray<AGridTile*> reachableTiles = character->GetGridMovementComponent()->GetReachableTiles();
+
+	AGridTile* closestTile = nullptr;
+
+	float closestDistance = TNumericLimits<float>::Max();
+
+	for (int i = 0; i < reachableTiles.Num(); i++)
+	{
+		float distance = FVector::Distance(reachableTiles[i]->GetActorLocation(), opponentTile->GetActorLocation());
+
+		if (distance < closestDistance)
+		{
+			closestTile = reachableTiles[i];
+			closestDistance = distance;
+		}
+	}
+
+	return closestTile;
+}
+
+void AEnemyPlayer::MoveToOpponent(ABaseCharacter* character, AGridTile* tile)
+{
+	character->GetGridMovementComponent()->CreatePathToDestination(*tile);
+
+	FTimerDelegate moveCharacterDelegate;
+	moveCharacterDelegate.BindUFunction(this, FName("MoveCharacter"), character);
+	GetWorld()->GetTimerManager().SetTimer(_moveToDestinationTimer, moveCharacterDelegate, 0.5f, false);
+}
+
+void AEnemyPlayer::MoveCharacter(ABaseCharacter* character)
+{
+	character->GetGridMovementComponent()->ClearVisuals();
+	GetWorld()->GetTimerManager().ClearTimer(_moveToDestinationTimer);
+	character->GetGridMovementComponent()->MoveToDestination();
+}
+
+void AEnemyPlayer::OnCharacterStoppedMoving(UGridMovementComponent* movementComp)
+{
+	movementComp->OnCharacterStopedMoving.RemoveAll(this);
+
+	auto character = Cast<ABaseCharacter>(movementComp->GetOwner());
+
+	auto closestOpponent = FindClosestOpponentToControlledChar(character);
+	TryDealingDamage(character, closestOpponent);
+}
+
+void AEnemyPlayer::TryMovingCharacter(ABaseCharacter* character, AGridTile* opponentTile)
+{
+	AGridTile* tile = nullptr;
+	if (IsOpponentTileInAttackRange(opponentTile, character, tile))
+	{
+		//move to tile to attack enemy
+		if (tile)
+		{
+			character->GetGridMovementComponent()->OnCharacterStopedMoving.AddUObject(this, &AEnemyPlayer::OnCharacterStoppedMoving);
+			MoveToOpponent(character, tile);
+		}
+	}
+	else
+	{
+		//move to tile closest to enemy 
+		tile = GetClosestReachableTileToOpponentTile(character, opponentTile);
+		if (!tile)
+			return;
+
+		MoveToOpponent(character, tile);
+
+	}
+}
+
+void AEnemyPlayer::TryDealingDamage(ABaseCharacter* character, ABaseCharacter* opponent)
+{
+	//Rotate towards opponent
+	const FRotator playerRotation = UKismetMathLibrary::FindLookAtRotation(character->GetActorLocation(), opponent->GetActorLocation());
+	character->SetActorRotation(playerRotation);
+
+	//show visual tile to attack
+	character->GetAttackComponent()->ShowTilesToAttack(character->GetGridMovementComponent()->GetCurrentTile()->GetGridIndex(), FVector2D(character->GetActorForwardVector()));
+}
+
 

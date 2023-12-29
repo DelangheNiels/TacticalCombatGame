@@ -5,6 +5,7 @@
 #include "BaseAttack.h"
 
 #include "../../Grid/Grid.h"
+#include "../../Grid/GridTile.h"
 
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 
@@ -80,5 +81,27 @@ bool UAttackComponent::GetHasAttacked() const
 void UAttackComponent::Reset()
 {
 	_hasAttacked = false;
+}
+
+int UAttackComponent::GetAttackRange() const
+{
+	return _attack->GetAttackRange();
+}
+
+int UAttackComponent::GetAttackOffset() const
+{
+	return _attack->GetAttackOffset();
+}
+
+TArray<AGridTile*> UAttackComponent::GetAttackableTiles(AGridTile* currentTile)
+{
+	TArray<AGridTile*> possibleTilesToAtttack;
+
+	if (_hasAttacked || !currentTile)
+		return possibleTilesToAtttack;
+
+	possibleTilesToAtttack = _attack->GetAllPossibleTilesToAttack(currentTile->GetGridIndex());
+
+	return possibleTilesToAtttack;
 }
 

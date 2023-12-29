@@ -9,6 +9,9 @@
 class ABaseCharacter;
 class UHealthComponent;
 class ATacticalCombatGameGameModeBase;
+class AGridTile;
+class APlayerPawn;
+class UGridMovementComponent;
 
 UCLASS()
 class TACTICALCOMBATGAME_API AEnemyPlayer : public AActor
@@ -37,9 +40,17 @@ private:
 		TArray<ABaseCharacter*> _charactersToControl;
 	UPROPERTY()
 		TArray<ABaseCharacter*> _controlledCharacters;
+	UPROPERTY()
+		TArray<ABaseCharacter*> _opponentCharacters;
 
 	UPROPERTY()
 		FTimerHandle _controlCharactersTimer;
+	UPROPERTY()
+		FTimerHandle _moveToDestinationTimer;
+	UPROPERTY()
+		FTimerHandle _rotateCharTimer;
+	UPROPERTY()
+		FTimerHandle _attackTimer;
 
 	UPROPERTY()
 		ATacticalCombatGameGameModeBase* _gamemode;
@@ -50,8 +61,33 @@ private:
 
 	UFUNCTION()
 		void OnControlledCharacterDie(UHealthComponent* healthcomp);
+	UFUNCTION()
+		void OnOpponentCharacterDied(UHealthComponent* healthcomp);
 
 	UFUNCTION()
 		void ControlNextCharacter();
 
+	UFUNCTION()
+		AGridTile* FindTileClosestOpponentTileToControlledChar(ABaseCharacter* character) const;
+
+	UFUNCTION()
+		ABaseCharacter* FindClosestOpponentToControlledChar(ABaseCharacter* character) const;
+
+	UFUNCTION()
+		bool IsOpponentTileInAttackRange(AGridTile* opponentTile, ABaseCharacter* character,AGridTile*& tileToAttackOpponent);
+	UFUNCTION()
+		AGridTile* GetClosestReachableTileToOpponentTile(ABaseCharacter* character, AGridTile* opponentTile);
+
+	UFUNCTION()
+		void MoveToOpponent(ABaseCharacter* character, AGridTile* tile);
+	UFUNCTION()
+		void MoveCharacter(ABaseCharacter* character);
+
+	UFUNCTION()
+		void OnCharacterStoppedMoving(UGridMovementComponent* movementComp);
+
+	void TryMovingCharacter(ABaseCharacter* character, AGridTile* tile);
+
+	UFUNCTION()
+		void TryDealingDamage(ABaseCharacter* character, ABaseCharacter* opponent);
 };

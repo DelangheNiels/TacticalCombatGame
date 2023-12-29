@@ -20,8 +20,15 @@ public:
 	void HideTilesToAttack();
 	void Attack(float damage);
 	void SetGrid(AGrid* grid);
+	int GetAttackRange() const;
+	int GetAttackOffset() const;
+	TArray<AGridTile*> GetAllPossibleTilesToAttack(const FVector2D& currentTileIndex);
 
 protected:
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+		int _attackRange = 1;
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+		int _attackOffset = 0;
 
 	UPROPERTY()
 		TArray<AGridTile*> _tilesToAttack;

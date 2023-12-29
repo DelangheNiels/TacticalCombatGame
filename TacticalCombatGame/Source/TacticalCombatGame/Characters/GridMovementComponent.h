@@ -11,7 +11,7 @@ class AGrid;
 class AGridPathfinding;
 
 DECLARE_MULTICAST_DELEGATE(FOnCharacterMoved);
-DECLARE_MULTICAST_DELEGATE(FOnCharacterStopedMoving);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnCharacterStopedMoving, UGridMovementComponent*);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class TACTICALCOMBATGAME_API UGridMovementComponent : public UActorComponent
@@ -41,6 +41,7 @@ public:
 
 	void ShowReachableTiles();
 	void HideReachableTiles();
+	TArray<AGridTile*> GetReachableTiles();
 
 	void ClearVisuals();
 	void Reset();

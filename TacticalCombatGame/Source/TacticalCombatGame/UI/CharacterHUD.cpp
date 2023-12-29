@@ -207,7 +207,7 @@ void UCharacterHUD::DisableInput()
 	_attackButton->SetIsEnabled(false);
 }
 
-void UCharacterHUD::EnableInput()
+void UCharacterHUD::EnableInput(UGridMovementComponent* movementComp)
 {
 	_moveButton->SetIsEnabled(true);
 	_attackButton->SetIsEnabled(true);

@@ -11,6 +11,7 @@ class ABaseCharacter;
 class UTextBlock;
 class UProgressBar;
 class UAttackComponent;
+class UGridMovementComponent;
 
 UCLASS()
 class TACTICALCOMBATGAME_API UCharacterHUD : public UUserWidget
@@ -87,7 +88,7 @@ private:
 	UFUNCTION()
 		void DisableInput();
 	UFUNCTION()
-		void EnableInput();
+		void EnableInput(UGridMovementComponent* movementComp = nullptr);
 
 	UFUNCTION()
 		void OnCharacterReset();

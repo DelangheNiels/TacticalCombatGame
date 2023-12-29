@@ -7,6 +7,7 @@
 #include "AttackComponent.generated.h"
 
 class UBaseAttack;
+class AGridTile;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class TACTICALCOMBATGAME_API UAttackComponent : public UActorComponent
@@ -29,6 +30,9 @@ public:
 	void StopAttacking();
 	bool GetHasAttacked() const;
 	void Reset();
+	int GetAttackRange() const;
+	int GetAttackOffset() const;
+	TArray<AGridTile*> GetAttackableTiles(AGridTile* currentTile);
 
 private:
 

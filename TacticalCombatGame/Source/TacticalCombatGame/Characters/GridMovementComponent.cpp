@@ -122,6 +122,12 @@ void UGridMovementComponent::HideReachableTiles()
 	}
 }
 
+TArray<AGridTile*> UGridMovementComponent::GetReachableTiles()
+{
+	FindReachableTiles();
+	return _reachableTiles;
+}
+
 void UGridMovementComponent::ClearVisuals()
 {
 	_grid->ResetGridVisuals();
@@ -194,7 +200,7 @@ void UGridMovementComponent::MoveAlongPath()
 		if (_pathToFollow.Num() <= 0)
 		{
 			_isMoving = false;
-			OnCharacterStopedMoving.Broadcast();
+			OnCharacterStopedMoving.Broadcast(this);
 
 			GetOwner()->SetActorLocation(_currentTile->GetActorLocation());
 		}
