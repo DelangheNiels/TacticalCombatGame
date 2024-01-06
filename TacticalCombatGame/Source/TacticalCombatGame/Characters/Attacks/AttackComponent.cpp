@@ -97,8 +97,10 @@ TArray<AGridTile*> UAttackComponent::GetAttackableTiles(AGridTile* currentTile)
 {
 	TArray<AGridTile*> possibleTilesToAtttack;
 
-	if (_hasAttacked || !currentTile)
+	if (!currentTile)
+	{
 		return possibleTilesToAtttack;
+	}
 
 	possibleTilesToAtttack = _attack->GetAllPossibleTilesToAttack(currentTile->GetGridIndex());
 

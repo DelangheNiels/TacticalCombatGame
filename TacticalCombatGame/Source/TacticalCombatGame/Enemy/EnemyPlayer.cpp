@@ -133,13 +133,28 @@ void AEnemyPlayer::ControlNextCharacter()
 	if (!closestOpponentTile)
 		return;
 
-	if (!character->GetAttackComponent()->GetAttackableTiles(character->GetGridMovementComponent()->GetCurrentTile()).Contains(closestOpponentTile))
+	bool canAttackOpponent = false;
+
+	TArray<AGridTile*> attackableTiles = character->GetAttackComponent()->GetAttackableTiles(character->GetGridMovementComponent()->GetCurrentTile());
+
+	for (int i = 0; i < attackableTiles.Num(); i++)
+	{
+		if (attackableTiles[i]->GetGridIndex().X == closestOpponentTile->GetGridIndex().X &&
+			attackableTiles[i]->GetGridIndex().Y == closestOpponentTile->GetGridIndex().Y)
+		{
+			canAttackOpponent = true;
+		}
+	}
+
+	//Move to closest tile
+	if (!attackableTiles.Contains(closestOpponentTile))
 	{
 		TryMovingCharacter(character, closestOpponentTile);
 	}
-	else
+	else //Move to opponent
 	{
 		auto closestOpponent = FindClosestOpponentToControlledChar(character);
+
 		DealDamage(character, closestOpponent);
 	}
 
@@ -276,6 +291,8 @@ void AEnemyPlayer::TryMovingCharacter(ABaseCharacter* character, AGridTile* oppo
 
 void AEnemyPlayer::DealDamage(ABaseCharacter* character, ABaseCharacter* opponent)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Red, TEXT("Dealing damage"));
+
 	//Rotate towards opponent
 	const FRotator playerRotation = UKismetMathLibrary::FindLookAtRotation(character->GetActorLocation(), opponent->GetActorLocation());
 	character->SetActorRotation(playerRotation);
