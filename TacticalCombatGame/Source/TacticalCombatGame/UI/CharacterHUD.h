@@ -12,6 +12,7 @@ class UTextBlock;
 class UProgressBar;
 class UAttackComponent;
 class UGridMovementComponent;
+class UHealthComponent;
 
 UCLASS()
 class TACTICALCOMBATGAME_API UCharacterHUD : public UUserWidget
@@ -94,6 +95,9 @@ private:
 		void OnCharacterReset();
 	UFUNCTION()
 		void OnCharacterLocked();
+
+	UFUNCTION()
+		void OnChacterDied(UHealthComponent* healthcomp);
 
 	
 };

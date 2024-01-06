@@ -51,12 +51,8 @@ TArray<AGridTile*> AGridPathfinding::GeneratePath(AGridTile* startTile, AGridTil
 
 	while (!isPathFound)
 	{
-		//Get next tile to check
 		tileToCheck = GetTileToCheck(path, startTile);
 		
-		//look at neighbors of tile
-		//calc dist for each of these tiles to destination
-		//take tile with smallest distance
 		AGridTile* closestTile = GetClosestNeighborToDestination(*tileToCheck, *destinationTile, checkedTiles);
 		if (closestTile == nullptr)
 		{

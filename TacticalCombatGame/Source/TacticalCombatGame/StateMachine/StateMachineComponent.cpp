@@ -43,6 +43,9 @@ void UStateMachineComponent::AddStateTransition(UState* fromState, UState* toSta
 	stateTransition.toState = toState;
 	stateTransition.transitionFunction = transitionFunction;
 
+	if (stateTransition.fromState == nullptr || stateTransition.toState == nullptr)
+		return;
+
 	_stateTransitions.Add(stateTransition);
 }
 
@@ -62,6 +65,10 @@ void UStateMachineComponent::CheckStateTransitions()
 	for (int i = 0; i < _stateTransitions.Num(); i++)
 	{
 		FStateTransition stateTransition = _stateTransitions[i];
+
+		if (stateTransition.fromState == nullptr || stateTransition.toState == nullptr)
+			continue;
+
 
 		if (stateTransition.fromState == _currentState && stateTransition.transitionFunction() == true)
 		{

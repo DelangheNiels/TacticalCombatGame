@@ -91,7 +91,6 @@ void APlayerPawn::ResetControlledCharacters()
 	for (int i = 0; i < _charactersToControl.Num(); i++)
 	{
 		_charactersToControl[i]->Reset();
-		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Green, TEXT("Resetting char"));
 	}
 }
 

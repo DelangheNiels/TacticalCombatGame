@@ -7,6 +7,8 @@
 
 #include "Attacks/AttackComponent.h"
 
+#include "../Grid/GridTile.h"
+
 #include "../UI/CharacterHUD.h"
 
 #include "Blueprint/UserWidget.h"
@@ -34,6 +36,9 @@ ABaseCharacter::ABaseCharacter()
 void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (_healthComponent)
+		_healthComponent->OnDied.AddUObject(this, &ABaseCharacter::OnDied);
 }
 
 // Called every frame
@@ -92,6 +97,14 @@ void ABaseCharacter::Reset()
 void ABaseCharacter::Lock()
 {
 	OnCharacterLocked.Broadcast();
+}
+
+void ABaseCharacter::OnDied(UHealthComponent* healthcomp)
+{
+	healthcomp->OnDied.RemoveAll(this);
+
+	_gridMovementComponent->GetCurrentTile()->SetIsCharacterOnTile(false);
+	
 }
 
 

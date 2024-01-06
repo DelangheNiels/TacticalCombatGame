@@ -35,9 +35,13 @@ void UCharacterHUD::NativeDestruct()
 
 	_character->OnCharacterLocked.RemoveAll(this);
 	_character->OnCharacterReset.RemoveAll(this);
+
 	_character->GetGridMovementComponent()->OnCharacterMoved.RemoveAll(this);
 	_character->GetGridMovementComponent()->OnCharacterStopedMoving.RemoveAll(this);
+
 	_character->GetHealthComponent()->OnHealthChanged.RemoveAll(this);
+	_character->GetHealthComponent()->OnDied.RemoveAll(this);
+
 	_character->OnCharacterRotated.RemoveAll(this);
 
 	_character = nullptr;
@@ -52,10 +56,14 @@ void UCharacterHUD::SetCharacter(ABaseCharacter* character)
 	
 	_character->OnCharacterLocked.AddUObject(this, &UCharacterHUD::OnCharacterLocked);
 	_character->OnCharacterReset.AddUObject(this, &UCharacterHUD::OnCharacterReset);
+
 	_character->GetGridMovementComponent()->OnCharacterMoved.AddUObject(this, &UCharacterHUD::SetCharacterMovement);
 	_character->GetGridMovementComponent()->OnCharacterMoved.AddUObject(this, &UCharacterHUD::DisableInput);
 	_character->GetGridMovementComponent()->OnCharacterStopedMoving.AddUObject(this, &UCharacterHUD::EnableInput);
+
 	_character->GetHealthComponent()->OnHealthChanged.AddUObject(this, &UCharacterHUD::SetCharacterHealth);
+	_character->GetHealthComponent()->OnDied.AddUObject(this, &UCharacterHUD::OnChacterDied);
+
 	_character->OnCharacterRotated.AddUObject(this, &UCharacterHUD::OnCharacterRotated);
 
 	SetCharacterHealth();
@@ -229,5 +237,12 @@ void UCharacterHUD::OnCharacterLocked()
 {
 	DisableInput();
 	_isLocked = true;
+}
+
+void UCharacterHUD::OnChacterDied(UHealthComponent* healthcomp)
+{
+	healthcomp->OnDied.RemoveAll(this);
+	
+	this->RemoveFromParent();
 }
 

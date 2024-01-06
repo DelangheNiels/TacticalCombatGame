@@ -45,5 +45,7 @@ private:
 	//Functions
 
 	void SpawnDamageNumber(float damage);
+
+	void Died();
 		
 };

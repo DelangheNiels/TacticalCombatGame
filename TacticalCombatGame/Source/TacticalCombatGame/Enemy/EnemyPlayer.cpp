@@ -53,7 +53,7 @@ void AEnemyPlayer::Tick(float DeltaTime)
 
 void AEnemyPlayer::ControlCharacters()
 {
-	GetWorld()->GetTimerManager().SetTimer(_controlCharactersTimer, this, &AEnemyPlayer::ControlNextCharacter, 1.5f, true);
+	GetWorld()->GetTimerManager().SetTimer(_controlCharactersTimer, this, &AEnemyPlayer::ControlNextCharacter, _waitTimeBetweenCharacters, true);
 }
 
 void AEnemyPlayer::ResetControlledCharacters()
@@ -140,7 +140,7 @@ void AEnemyPlayer::ControlNextCharacter()
 	else
 	{
 		auto closestOpponent = FindClosestOpponentToControlledChar(character);
-		TryDealingDamage(character, closestOpponent);
+		DealDamage(character, closestOpponent);
 	}
 
 	_charactersToControl.Remove(character);
@@ -230,7 +230,7 @@ void AEnemyPlayer::MoveToOpponent(ABaseCharacter* character, AGridTile* tile)
 
 	FTimerDelegate moveCharacterDelegate;
 	moveCharacterDelegate.BindUFunction(this, FName("MoveCharacter"), character);
-	GetWorld()->GetTimerManager().SetTimer(_moveToDestinationTimer, moveCharacterDelegate, 0.5f, false);
+	GetWorld()->GetTimerManager().SetTimer(_moveToDestinationTimer, moveCharacterDelegate, _waitTimeToMove, false);
 }
 
 void AEnemyPlayer::MoveCharacter(ABaseCharacter* character)
@@ -247,7 +247,7 @@ void AEnemyPlayer::OnCharacterStoppedMoving(UGridMovementComponent* movementComp
 	auto character = Cast<ABaseCharacter>(movementComp->GetOwner());
 
 	auto closestOpponent = FindClosestOpponentToControlledChar(character);
-	TryDealingDamage(character, closestOpponent);
+	DealDamage(character, closestOpponent);
 }
 
 void AEnemyPlayer::TryMovingCharacter(ABaseCharacter* character, AGridTile* opponentTile)
@@ -274,7 +274,7 @@ void AEnemyPlayer::TryMovingCharacter(ABaseCharacter* character, AGridTile* oppo
 	}
 }
 
-void AEnemyPlayer::TryDealingDamage(ABaseCharacter* character, ABaseCharacter* opponent)
+void AEnemyPlayer::DealDamage(ABaseCharacter* character, ABaseCharacter* opponent)
 {
 	//Rotate towards opponent
 	const FRotator playerRotation = UKismetMathLibrary::FindLookAtRotation(character->GetActorLocation(), opponent->GetActorLocation());
@@ -282,6 +282,20 @@ void AEnemyPlayer::TryDealingDamage(ABaseCharacter* character, ABaseCharacter* o
 
 	//show visual tile to attack
 	character->GetAttackComponent()->ShowTilesToAttack(character->GetGridMovementComponent()->GetCurrentTile()->GetGridIndex(), FVector2D(character->GetActorForwardVector()));
+
+	//wait a short time to show tile to attak and deal damage to opponent character
+	FTimerDelegate attackDelegate;
+	attackDelegate.BindUFunction(this, FName("DoAttack"), character);
+	GetWorld()->GetTimerManager().SetTimer(_attackTimer, attackDelegate, _waitTimeToAttack, false);
+
 }
+
+void AEnemyPlayer::DoAttack(ABaseCharacter* character)
+{
+	GetWorld()->GetTimerManager().ClearTimer(_attackTimer);
+	character->GetGridMovementComponent()->ClearVisuals();
+	character->GetAttackComponent()->DoAttack();
+}
+
 
 

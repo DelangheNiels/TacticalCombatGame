@@ -75,5 +75,7 @@ private:
 
 	bool _isControlledByPlayer;
 
+	void OnDied(UHealthComponent* healthcomp);
+
 
 };

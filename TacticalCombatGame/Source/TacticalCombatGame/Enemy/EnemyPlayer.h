@@ -36,6 +36,13 @@ public:
 
 private:
 
+	UPROPERTY(EditAnywhere, meta = (AllowrivateAccess = "true"))
+		float _waitTimeBetweenCharacters = 0.7f;
+	UPROPERTY(EditAnywhere, meta = (AllowrivateAccess = "true"))
+		float _waitTimeToMove = 0.25f;
+	UPROPERTY(EditAnywhere, meta = (AllowrivateAccess = "true"))
+		float _waitTimeToAttack = 0.25f;
+
 	UPROPERTY()
 		TArray<ABaseCharacter*> _charactersToControl;
 	UPROPERTY()
@@ -89,5 +96,8 @@ private:
 	void TryMovingCharacter(ABaseCharacter* character, AGridTile* tile);
 
 	UFUNCTION()
-		void TryDealingDamage(ABaseCharacter* character, ABaseCharacter* opponent);
+		void DealDamage(ABaseCharacter* character, ABaseCharacter* opponent);
+
+	UFUNCTION()
+		void DoAttack(ABaseCharacter* character);
 };

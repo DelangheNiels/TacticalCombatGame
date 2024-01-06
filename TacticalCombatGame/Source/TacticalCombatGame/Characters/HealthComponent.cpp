@@ -49,7 +49,7 @@ void UHealthComponent::TakeDamage(float damage)
 		return;
 
 	OnDied.Broadcast(this);
-	GetOwner()->Destroy();
+	Died();
 }
 
 void UHealthComponent::SpawnDamageNumber(float damage)
@@ -57,5 +57,10 @@ void UHealthComponent::SpawnDamageNumber(float damage)
 	auto damageNumber = Cast<UDamageNumber>(CreateWidget(GetWorld(), _damageNumberHudRef));
 	damageNumber->Instantiate(damage, GetOwner()->GetActorLocation());
 	damageNumber->AddToViewport();
+}
+
+void UHealthComponent::Died()
+{
+	GetOwner()->Destroy();
 }
 
